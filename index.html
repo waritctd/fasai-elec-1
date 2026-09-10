@@ -1,0 +1,1165 @@
+<title>Nodal Analysis Studio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400;1,600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#f3f5f7; --surface:#ffffff; --surface2:#e9edf1; --ink:#161e28; --ink2:#4a5866; --muted:#7a8794; --line:#d3dae2;
+  --accent:#1e4fd8; --accent-ink:#ffffff; --accent-soft:#e3eafc;
+  --n1:#1e4fd8; --n2:#b85c0a; --n3:#0e8a67; --n0:#7a8794;
+  --n1-soft:#e3eafc; --n2-soft:#fbeedd; --n3-soft:#dcf3ec;
+  --ok:#0e8a67; --ok-soft:#dcf3ec; --warn:#b85c0a; --warn-soft:#fbeedd; --bad:#c0392b; --bad-soft:#fae3e0;
+  --tutor:#fff6d8; --tutor-line:#e8c96a; --tutor-ink:#5b4a12;
+  --shadow:0 1px 2px rgba(22,30,40,.06),0 8px 24px -12px rgba(22,30,40,.18);
+  --display:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --serif:"IBM Plex Serif",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0f141a; --surface:#171e26; --surface2:#1f2832; --ink:#e7ecf1; --ink2:#b3bdc8; --muted:#8593a1; --line:#2b3642;
+    --accent:#7ea1ff; --accent-ink:#0f141a; --accent-soft:#1c2a4a;
+    --n1:#7ea1ff; --n2:#f0a35c; --n3:#4fd1a8; --n0:#8593a1;
+    --n1-soft:#1c2a4a; --n2-soft:#3d2a14; --n3-soft:#12362c;
+    --ok:#4fd1a8; --ok-soft:#12362c; --warn:#f0a35c; --warn-soft:#3d2a14; --bad:#ff7b6b; --bad-soft:#3d1b17;
+    --tutor:#2e2812; --tutor-line:#6f5b1e; --tutor-ink:#f1dd9a;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0f141a; --surface:#171e26; --surface2:#1f2832; --ink:#e7ecf1; --ink2:#b3bdc8; --muted:#8593a1; --line:#2b3642;
+  --accent:#7ea1ff; --accent-ink:#0f141a; --accent-soft:#1c2a4a;
+  --n1:#7ea1ff; --n2:#f0a35c; --n3:#4fd1a8; --n0:#8593a1;
+  --n1-soft:#1c2a4a; --n2-soft:#3d2a14; --n3-soft:#12362c;
+  --ok:#4fd1a8; --ok-soft:#12362c; --warn:#f0a35c; --warn-soft:#3d2a14; --bad:#ff7b6b; --bad-soft:#3d1b17;
+  --tutor:#2e2812; --tutor-line:#6f5b1e; --tutor-ink:#f1dd9a;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+h1,h2,h3,h4{font-family:var(--display);text-wrap:balance;line-height:1.12;margin:0}
+h1{font-size:clamp(30px,4.2vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:clamp(24px,3vw,32px);font-weight:800;letter-spacing:-.01em}
+h3{font-size:21px;font-weight:700}
+h4{font-size:17px;font-weight:700}
+p{margin:0 0 1em}
+ul,ol{margin:0 0 1em;padding-left:1.35em}
+li{margin:.25em 0}
+code,.mono{font-family:var(--mono);font-size:.92em}
+strong{font-weight:600}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- layout ---------- */
+.topbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1180px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:800;font-size:18px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+.brand .chip{font-family:var(--mono);font-weight:500;font-size:11px;letter-spacing:.1em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);padding:3px 8px;border-radius:999px}
+.spacer{flex:1}
+.toggle{display:inline-flex;align-items:center;gap:10px;font-size:14px;color:var(--ink2);cursor:pointer;user-select:none}
+.toggle input{appearance:none;width:40px;height:22px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);position:relative;cursor:pointer;transition:background .2s;margin:0}
+.toggle input::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .2s}
+.toggle input:checked{background:var(--accent);border-color:var(--accent)}
+.toggle input:checked::after{transform:translateX(18px)}
+.toggle input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.progress{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.progress b{color:var(--ink);font-weight:500}
+
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 80px;display:grid;grid-template-columns:250px minmax(0,1fr);gap:40px}
+@media (max-width:900px){.wrap{grid-template-columns:1fr;gap:24px}}
+.rail{position:sticky;top:64px;align-self:start;max-height:calc(100vh - 80px);overflow:auto;padding-right:6px}
+@media (max-width:900px){.rail{position:static;max-height:none}}
+.rail h4{margin:0 0 10px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-family:var(--mono);font-weight:500;color:var(--muted)}
+.tl{list-style:none;padding:0;margin:0 0 22px;border-left:2px solid var(--line)}
+.tl li{position:relative;padding:6px 0 6px 16px}
+.tl li::before{content:"";position:absolute;left:-6px;top:14px;width:10px;height:10px;border-radius:50%;background:var(--paper);border:2px solid var(--line)}
+.tl li.active::before{background:var(--accent);border-color:var(--accent)}
+.tl a{color:var(--ink);text-decoration:none;font-size:14.5px;font-weight:500;display:block;line-height:1.3}
+.tl a:hover{color:var(--accent)}
+.tl .t{font-family:var(--mono);font-size:11.5px;color:var(--muted);display:block}
+.tl li.brk a{color:var(--muted);font-weight:400;font-style:italic}
+.master{list-style:none;padding:0;margin:0}
+.master li{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:4px 0;color:var(--ink2)}
+.master input{margin-top:4px;accent-color:var(--ok)}
+.master li.done{color:var(--muted);text-decoration:line-through}
+
+main{min-width:0;max-width:820px}
+.hero{padding:6px 0 22px;border-bottom:1px solid var(--line);margin-bottom:26px}
+.hero p.lede{font-size:18.5px;color:var(--ink2);max-width:62ch;margin-top:12px}
+.hero .meta{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:10px}
+.hero .meta b{color:var(--ink);font-weight:500}
+
+section.block{padding:30px 0 18px;border-top:1px solid var(--line);scroll-margin-top:70px}
+section.block:first-of-type{border-top:0}
+.blockhead{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
+.blockhead .eyebrow{white-space:nowrap}
+.goal{font-size:15.5px;color:var(--ink2);margin:6px 0 20px;max-width:64ch}
+.goal b{color:var(--ink)}
+main p,main li{max-width:68ch}
+
+/* ---------- figures ---------- */
+figure{margin:18px 0 22px;padding:14px 10px 6px;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+figure svg{display:block;margin:0 auto;max-width:100%;height:auto;color:var(--ink)}
+figure figcaption{font-size:13.5px;color:var(--muted);text-align:center;padding:8px 8px 6px;font-family:var(--mono)}
+svg .lbl{font-family:var(--body)}
+svg .nodelbl{font-family:var(--display)}
+svg .ann{font-family:var(--serif);font-style:italic}
+svg .el,svg .nd,svg .wire{transition:opacity .15s}
+svg.dim .el,svg.dim .wire,svg.dim .gnd{opacity:.22}
+svg.dim .el.hi,svg.dim .wire.hi,svg.dim .gnd.hi{opacity:1}
+svg .el.hi path,svg .el.hi circle,svg .el.hi polygon,svg .el.hi line{stroke:var(--accent)}
+svg .el.hi polygon[fill]:not([fill="none"]),svg .el.hi text{fill:var(--accent)}
+svg .el.hi circle[fill]{fill:var(--paper)}
+svg .nd{cursor:pointer}
+svg .nd circle{transition:r .1s}
+svg .nd:hover circle{r:6.5}
+svg .nd.on circle{r:7;fill:var(--accent)}
+svg .nd.on text{fill:var(--accent)}
+svg.colored [data-nodes="A"] path,svg.colored [data-nodes="A"] circle{stroke:var(--n1);fill:var(--n1)}
+svg.colored [data-nodes="B"] path,svg.colored [data-nodes="B"] circle{stroke:var(--n2);fill:var(--n2)}
+svg.colored .wire[data-nodes="0"] path,svg.colored .nd[data-nodes="0"] circle,svg.colored .gnd path{stroke:var(--n3);fill:var(--n3)}
+svg.colored .wire path{stroke-width:5;fill:none!important}
+svg.colored .gnd path{fill:none!important}
+.fig-row{display:grid;grid-template-columns:1fr;gap:14px}
+
+/* ---------- equations ---------- */
+.eq{font-family:var(--serif);font-size:1.06em}
+.eq i{font-style:italic}
+.eq sub{font-size:.72em;font-style:normal}
+.eqblock{font-family:var(--serif);font-size:1.12em;line-height:1.75;margin:10px 0 16px;padding:12px 18px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--line);border-radius:8px;overflow-x:auto}
+.eqblock div{white-space:nowrap}
+.eqblock .lab{font-family:var(--mono);font-style:normal;font-size:12px;color:var(--muted);margin-right:14px;letter-spacing:.06em}
+.eqblock .num{font-family:var(--mono);font-style:normal;font-size:12px;color:var(--muted);margin-left:14px}
+.eqblock .res{color:var(--ok);font-weight:600}
+.eqblock .n1{color:var(--n1)} .eqblock .n2{color:var(--n2)} .eqblock .n3{color:var(--n3)}
+.rule{padding:16px 20px;margin:16px 0 20px;background:var(--accent-soft);border-radius:10px;border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
+.rule h4{color:var(--accent);margin-bottom:6px}
+.rule p:last-child{margin-bottom:0}
+.rule .eqblock{background:var(--surface);margin-bottom:8px}
+.callout{padding:14px 18px;margin:14px 0;border-radius:10px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent)}
+.callout.warn{border-left-color:var(--warn);background:var(--warn-soft)}
+.callout.ok{border-left-color:var(--ok);background:var(--ok-soft)}
+.callout p:last-child{margin-bottom:0}
+.callout .eyebrow{display:block;margin-bottom:4px}
+
+/* ---------- tutor notes ---------- */
+.tutor{display:none;background:var(--tutor);border:1px solid var(--tutor-line);color:var(--tutor-ink);border-radius:10px;padding:12px 16px;margin:14px 0;font-size:14.5px}
+.tutor .eyebrow{color:var(--tutor-ink);opacity:.8;display:block;margin-bottom:4px}
+.tutor p,.tutor li{max-width:none;margin-bottom:.5em}
+.tutor p:last-child{margin-bottom:0}
+body.tutor-on .tutor{display:block}
+
+/* ---------- interactive ---------- */
+.explorer{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;margin:18px 0 24px}
+@media (max-width:760px){.explorer{grid-template-columns:1fr}}
+.explorer figure{margin:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:14.5px;min-height:200px}
+.panel h4{font-size:14px;margin-bottom:8px}
+.panel .hint{color:var(--muted);font-size:13.5px}
+.panel .term{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px dashed var(--line)}
+.panel .term:first-of-type{border-top:0}
+.panel .term .t{font-family:var(--serif);font-size:1.05em;white-space:nowrap;min-width:84px}
+.panel .term .w{color:var(--ink2);font-size:13px;line-height:1.4}
+.panel .sum{margin-top:10px;padding-top:10px;border-top:2px solid var(--line);font-family:var(--serif);font-size:1.05em}
+.panel .sum small{display:block;font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-bottom:4px}
+.nodebtns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.nodebtns button{font:500 13px var(--mono);padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);color:var(--ink);cursor:pointer}
+.nodebtns button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.nodebtns button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.btn{font:500 14px var(--body);padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 6px}
+
+.worked{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:18px 0 26px;box-shadow:var(--shadow);overflow:hidden}
+.worked > header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;background:var(--surface2)}
+.worked > header h3{font-size:18px}
+.worked > header .src{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.worked .body{padding:16px 20px 6px}
+.worked figure{margin:0 0 14px;background:transparent;border:0;padding:0}
+.steps{list-style:none;padding:0;margin:0;counter-reset:step}
+.steps > li{counter-increment:step;border-top:1px solid var(--line);padding:12px 0 10px;display:none}
+.steps > li.shown{display:block}
+.steps > li h4{font-size:15.5px;margin-bottom:6px;display:flex;gap:10px;align-items:baseline}
+.steps > li h4::before{content:counter(step);font:600 12px var(--mono);color:var(--accent-ink);background:var(--accent);border-radius:6px;padding:2px 7px}
+.steps > li p{max-width:70ch}
+.stepctl{display:flex;gap:8px;align-items:center;padding:10px 0 12px;border-top:1px solid var(--line)}
+.stepctl .cnt{font-family:var(--mono);font-size:12px;color:var(--muted);margin-left:auto}
+
+.turn{border:2px dashed color-mix(in srgb,var(--accent) 45%,transparent);border-radius:12px;padding:16px 20px 10px;margin:20px 0 26px;background:color-mix(in srgb,var(--accent-soft) 40%,var(--surface))}
+.turn h3{display:flex;align-items:center;gap:10px;font-size:18px}
+.turn h3 .tag{font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);padding:3px 8px;border-radius:6px}
+.turn figure{background:var(--surface)}
+.turn ol{margin-bottom:8px}
+details.rv{border:1px solid var(--line);border-radius:8px;background:var(--surface);margin:8px 0}
+details.rv summary{cursor:pointer;padding:9px 14px;font-weight:500;font-size:14.5px;list-style:none;display:flex;align-items:center;gap:8px}
+details.rv summary::-webkit-details-marker{display:none}
+details.rv summary::before{content:"▸";color:var(--accent);font-size:13px;transition:transform .15s}
+details.rv[open] summary::before{transform:rotate(90deg)}
+details.rv summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:8px}
+details.rv .in{padding:4px 16px 12px;border-top:1px solid var(--line)}
+details.rv .in p{max-width:70ch}
+
+.quiz{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:14px 18px;margin:14px 0 20px}
+.quiz .q{font-weight:500;margin-bottom:8px}
+.quiz .opts{display:flex;flex-direction:column;gap:6px}
+.quiz .opts button{text-align:left;font:400 14.5px var(--body);padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.quiz .opts button:hover{border-color:var(--accent)}
+.quiz .opts button.right{background:var(--ok-soft);border-color:var(--ok)}
+.quiz .opts button.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.quiz .fb{margin-top:10px;font-size:14px;color:var(--ink2);min-height:1.2em}
+.quiz .fb.ok{color:var(--ok)} .quiz .fb.no{color:var(--bad)}
+
+table.tbl{border-collapse:collapse;width:100%;font-size:14.5px;margin:10px 0 18px}
+table.tbl th,table.tbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.tbl th{font-family:var(--mono);font-weight:500;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+table.tbl td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tblwrap{overflow-x:auto}
+.mistakes{list-style:none;padding:0;margin:0}
+.mistakes li{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.mistakes li:first-child{border-top:0}
+.mistakes .x{color:var(--bad);font-weight:700;font-family:var(--mono);font-size:15px}
+.mistakes b{display:block}
+.mistakes p{margin:2px 0 0;font-size:14.5px;color:var(--ink2)}
+
+.practice{counter-reset:pr}
+.prob{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:16px 0;overflow:hidden}
+.prob > header{display:flex;gap:12px;align-items:baseline;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--surface2)}
+.prob > header .no{font:600 12px var(--mono);background:var(--ink);color:var(--paper);border-radius:6px;padding:2px 8px}
+.prob > header h3{font-size:17px}
+.prob > header .lvl{margin-left:auto;font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.prob .body{padding:14px 18px 10px}
+.prob figure{margin:0 0 12px;border:0;background:transparent;padding:0}
+.prob .ask{font-weight:500}
+.prob details.rv{margin:8px 0}
+.ans{font-family:var(--mono);font-size:14px;background:var(--ok-soft);color:var(--ok);display:inline-block;padding:3px 10px;border-radius:6px;margin:4px 0}
+footer.end{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted);font-family:var(--mono)}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--surface2)}
+.nodecolor{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
+</style>
+<div class="topbar"><div class="topbar-in">
+  <div class="brand">Nodal Analysis Studio <span class="chip">Day 1 of 2</span></div>
+  <div class="spacer"></div>
+  <div class="progress">Mastery <b id="mcount">0</b>/<b id="mtotal">0</b></div>
+  <label class="toggle"><input type="checkbox" id="tutorToggle"> Tutor notes</label>
+</div></div>
+
+<div class="wrap">
+<aside class="rail">
+  <h4>Today's plan · ≈ 3 h 40 min</h4>
+  <ol class="tl" id="timeline">
+    <li><a href="#b0"><span class="t">0:00 – 0:40</span>Foundations: voltage, current, nodes</a></li>
+    <li><a href="#b1"><span class="t">0:40 – 1:05</span>Kirchhoff's current law &amp; node voltages</a></li>
+    <li class="brk"><a><span class="t">1:05 – 1:15</span>break</a></li>
+    <li><a href="#b2"><span class="t">1:15 – 2:00</span>The nodal recipe</a></li>
+    <li><a href="#b3"><span class="t">2:00 – 2:40</span>Voltage sources &amp; supernodes</a></li>
+    <li class="brk"><a><span class="t">2:40 – 2:50</span>break</a></li>
+    <li><a href="#b4"><span class="t">2:50 – 3:30</span>Dependent sources</a></li>
+    <li><a href="#b5"><span class="t">3:30 – 3:55</span>Quiz technique &amp; timed drill</a></li>
+    <li><a href="#hw"><span class="t">homework</span>Practice set with answers</a></li>
+  </ol>
+  <h4>I can…</h4>
+  <ul class="master" id="mastery">
+    <li><input type="checkbox" data-k="m1"><span>find every node in a circuit and pick a reference</span></li>
+    <li><input type="checkbox" data-k="m2"><span>write the current through a resistor from two node voltages</span></li>
+    <li><input type="checkbox" data-k="m3"><span>write KCL at a node with the right signs</span></li>
+    <li><input type="checkbox" data-k="m4"><span>solve 2 and 3 simultaneous equations</span></li>
+    <li><input type="checkbox" data-k="m5"><span>handle a grounded voltage source (known node)</span></li>
+    <li><input type="checkbox" data-k="m6"><span>build a supernode and its KVL constraint</span></li>
+    <li><input type="checkbox" data-k="m7"><span>translate a dependent source into node voltages</span></li>
+    <li><input type="checkbox" data-k="m8"><span>compute the power of a source with the right sign</span></li>
+    <li><input type="checkbox" data-k="m9"><span>check my answer by plugging back into KCL</span></li>
+  </ul>
+</aside>
+
+<main>
+<div class="hero">
+  <span class="eyebrow">2141270 Electrical Circuits · Quiz prep · Nodal analysis (2 of 3 quiz questions)</span>
+  <h1>Nodal analysis, from zero to writing it yourself</h1>
+  <p class="lede">One day, one method. By the end you should be able to look at any DC circuit — with current sources, voltage sources, or dependent sources — and write the equations on paper without help, then solve them to decimals.</p>
+  <div class="meta">
+    <span>Built from: <b>DC Part II slides (Nodal Analysis, ex. 2–10)</b></span>
+    <span>Exercise sheet: <b>#2</b></span>
+    <span>Old quiz: <b>Q2, Q4 style</b></span>
+  </div>
+  <div class="tutor">
+    <span class="eyebrow">How to use this page</span>
+    <p>Turn <b>Tutor notes</b> on to see talk-tracks, timings and checks-for-understanding (these yellow boxes). Turn it off when you hand the screen to her. Everything in a dashed <b>Your turn</b> box is for her to do <em>on paper first</em>, then reveal. Don't reveal for her — the whole day is about her hand writing the equations.</p>
+    <p>The old quiz shows the level: every nodal question will have a <b>dependent source</b> and usually a <b>supernode</b>, and one part will ask for the <b>power of a source</b> (that's where marks were lost last time). Blocks 3–5 are where the marks are; blocks 0–2 make them possible.</p>
+  </div>
+</div>
+<section class="block" id="b0">
+<div class="blockhead"><span class="eyebrow">Block 0 · 0:00–0:40</span><h2>Foundations: voltage, current, nodes</h2></div>
+<p class="goal"><b>Goal:</b> know what the symbols mean, be able to say which way current flows through a resistor, and find every node in a circuit. Nothing here is "the method" yet — but every mistake in nodal analysis traces back to one of these four ideas.</p>
+
+<div class="tutor"><span class="eyebrow">Tutor · 40 min</span>
+<p>Don't lecture the whole 40 minutes. Spend ~10 min on current/voltage, ~8 on symbols, ~10 on Ohm's law <em>with direction</em>, ~12 on nodes (the colouring exercise). The one thing she must leave this block with: <b>"voltage is a height; current flows downhill through a resistor, and the amount is the height difference divided by R."</b> Say it five times today.</p></div>
+
+<h3>0.1 Current and voltage</h3>
+<p><b>Current</b> (<span class="eq"><i>i</i></span>, in amperes, A) is how much charge flows past a point per second — like litres per second in a pipe. It has a direction, which we draw as an arrow. If the true flow is opposite to our arrow, the number simply comes out negative. That is normal and not a mistake.</p>
+<p><b>Voltage</b> (<span class="eq"><i>v</i></span>, in volts, V) is a <em>difference in electrical height</em> between two points. It's the "pressure" that pushes current. A voltage is <em>always between two points</em>: "the voltage across the resistor", "the voltage between node a and node b". When we say "the voltage <em>at</em> a node" we secretly mean "…relative to a point we've agreed to call 0 V" — the <b>reference node</b>, drawn with the ground symbol.</p>
+<div class="callout"><span class="eyebrow">The picture to keep</span>
+<p>Think of every node as a floor in a building. The reference node is the ground floor (0 V). A node voltage is just "which floor is this node on". A resistor is a slide between two floors: current slides <em>down</em> it, faster when the drop is bigger and slower when the slide is longer (bigger R). A voltage source is an elevator that fixes the floor difference between its two ends; a current source is a pump that forces a fixed flow no matter what.</p></div>
+
+<h3>0.2 The symbols you'll see on the quiz</h3>
+<figure><svg class="circ" viewBox="-80 -55 615.0 232.0" width="615.0" height="232.0" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="el" data-nodes="" ><path d="M 0.0 30.0 L 23.0 30.0 L 26.7 37.0 L 34.0 23.0 L 41.3 37.0 L 48.7 23.0 L 56.0 37.0 L 63.3 23.0 L 67.0 30.0 L 90.0 30.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="45.0" y="52.0" text-anchor="middle" dominant-baseline="hanging" font-size="15" fill="currentColor" class="lbl">R</text></g>
+<text x="45.0" y="90.0" text-anchor="middle" dominant-baseline="central" font-size="13" fill="currentColor" class="lbl">resistor</text>
+<g class="el src" data-nodes="" ><path d="M 132.0 72.0 L 132.0 51.0 M 132.0 21.0 L 132.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="132.0" cy="36.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><text x="132.0" y="29.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="132.0" y="42.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">−</text><text x="156.0" y="36.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">12 V</text></g>
+<text x="144.0" y="90.0" text-anchor="middle" dominant-baseline="central" font-size="13" fill="currentColor" class="lbl">voltage source</text>
+<g class="el src" data-nodes="" ><path d="M 240.0 72.0 L 240.0 51.0 M 240.0 21.0 L 240.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="240.0" cy="36.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="240.0" y1="45.0" x2="240.0" y2="27.0" stroke="currentColor" stroke-width="2"/><polygon points="240.0,24.0 243.8,31.0 236.2,31.0" fill="currentColor" stroke="none"/><text x="264.0" y="36.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">2 A</text></g>
+<text x="252.0" y="90.0" text-anchor="middle" dominant-baseline="central" font-size="13" fill="currentColor" class="lbl">current source</text>
+<g class="el src" data-nodes="" ><path d="M 336.0 72.0 L 336.0 51.0 M 336.0 21.0 L 336.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><polygon points="336.0,21.0 351.0,36.0 336.0,51.0 321.0,36.0" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><text x="336.0" y="29.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="336.0" y="42.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">−</text><text x="360.0" y="36.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="var(--accent, #c2410c)" class="lbl">3vx</text></g>
+<g class="el src" data-nodes="" ><path d="M 420.0 72.0 L 420.0 51.0 M 420.0 21.0 L 420.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><polygon points="420.0,21.0 435.0,36.0 420.0,51.0 405.0,36.0" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="420.0" y1="45.0" x2="420.0" y2="27.0" stroke="currentColor" stroke-width="2"/><polygon points="420.0,24.0 423.9,31.0 416.1,31.0" fill="currentColor" stroke="none"/><text x="444.0" y="36.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="var(--accent, #c2410c)" class="lbl">2ix</text></g>
+<text x="390.0" y="90.0" text-anchor="middle" dominant-baseline="central" font-size="13" fill="currentColor" class="lbl">dependent sources</text></svg><figcaption>Every element on this year's quizzes is one of these. Diamonds are dependent (controlled) sources.</figcaption></figure>
+<ul>
+  <li><b>Resistor</b> — obeys Ohm's law, <span class="eq"><i>v</i> = <i>R</i>·<i>i</i></span>. Always absorbs power.</li>
+  <li><b>Independent voltage source</b> — fixes the voltage between its + and − ends (e.g. 12 V, + side is 12 V higher). <em>The current through it is whatever the rest of the circuit needs</em> — you cannot know it from the symbol.</li>
+  <li><b>Independent current source</b> — forces exactly that current in the arrow direction. <em>The voltage across it is whatever the circuit needs</em> — it is <b>not</b> zero (the slides call this out as the classic beginner mistake).</li>
+  <li><b>Dependent sources</b> (diamond) — same as above, but the value is <em>gain × something else in the circuit</em>: 3<span class="eq"><i>v</i><sub>x</sub></span> means "three times the voltage <span class="eq"><i>v</i><sub>x</sub></span> marked somewhere else". Every quiz has one. We'll handle them in Block 4.</li>
+  <li><b>Wire</b> — zero resistance, so both ends are at exactly the same voltage. This is what makes a "node".</li>
+  <li><b>Ground</b> — the node we declare to be 0 V. It's our choice; the answers (currents, voltage differences) don't depend on it.</li>
+</ul>
+
+<h3>0.3 Ohm's law — with direction</h3>
+<figure><svg class="circ" viewBox="-80 -55 405 160" width="405" height="160" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="nd" data-nodes="a" data-node="a"><circle cx="30.0" cy="30.0" r="4" fill="currentColor"/><text x="18.0" y="30.0" text-anchor="end" dominant-baseline="central" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">a</text></g>
+<g class="nd" data-nodes="b" data-node="b"><circle cx="210.0" cy="30.0" r="4" fill="currentColor"/><text x="222.0" y="30.0" text-anchor="start" dominant-baseline="central" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">b</text></g>
+<g class="el" data-nodes="a b" ><path d="M 30.0 30.0 L 98.0 30.0 L 101.7 37.0 L 109.0 23.0 L 116.3 37.0 L 123.7 23.0 L 131.0 37.0 L 138.3 23.0 L 142.0 30.0 L 210.0 30.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="120.0" y="10.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">4 Ω</text></g>
+<g class="ann" data-nodes="" ><line x1="106.0" y1="52.0" x2="134.0" y2="52.0" stroke="var(--accent, #c2410c)" stroke-width="2"/><polygon points="137.0,52.0 130.0,55.9 130.0,48.1" fill="var(--accent, #c2410c)" stroke="none"/><text x="120.0" y="58.0" text-anchor="middle" dominant-baseline="hanging" font-size="14" fill="var(--accent, #c2410c)" class="ann">i = (va − vb)/4 = 1.5 A</text></g>
+<text x="30.0" y="-9.0" text-anchor="middle" dominant-baseline="central" font-size="14" fill="currentColor" class="lbl">va = 8 V</text>
+<text x="210.0" y="-9.0" text-anchor="middle" dominant-baseline="central" font-size="14" fill="currentColor" class="lbl">vb = 2 V</text></svg><figcaption>Current through a resistor: (voltage at the tail of the arrow − voltage at the head) ÷ R.</figcaption></figure>
+<div class="rule"><h4>Rule 1 — the only formula you need for resistors</h4>
+<div class="eqblock"><div><i>i</i><sub>a→b</sub> = (<i>v</i><sub>a</sub> − <i>v</i><sub>b</sub>) / <i>R</i></div></div>
+<p>Pick a direction for the arrow. The current in that direction is <em>(voltage where the arrow starts − voltage where it ends) ÷ R</em>. Here: (8 − 2)/4 = 1.5 A flowing from a to b. If you had drawn the arrow the other way you'd get (2 − 8)/4 = −1.5 A — same physics, negative sign. Either is correct as long as the sign matches the arrow.</p></div>
+
+<div class="quiz" data-answer="1">
+  <div class="q">Node a is at 3 V, node b is at 11 V, and there's a 2 Ω resistor between them. What is the current <span class="eq"><i>i</i><sub>a→b</sub></span> (arrow pointing from a to b)?</div>
+  <div class="opts">
+    <button>+4 A</button><button>−4 A</button><button>+16 A</button><button>0 A, because current can't flow uphill</button>
+  </div>
+  <div class="fb" data-ok="Right: (3 − 11)/2 = −4 A. The minus sign tells you the real flow is b → a, downhill from 11 V to 3 V." data-no="Use Rule 1: (start − end)/R = (3 − 11)/2 = −4 A. Negative just means the real flow is from b to a."></div>
+</div>
+
+<h3>0.4 Nodes — the skill everything depends on</h3>
+<p>A <b>node</b> is a whole set of points joined by wires, not a single dot. Because a wire has no resistance, every point on it is at the same voltage, so it all counts as <em>one</em> node. To find nodes: put your pen on a wire and follow it through every junction, stopping only when you hit a component. Everything you touched is one node.</p>
+<div class="explorer">
+  <figure><svg id="figNodes" class="circ" viewBox="-80 -55 525 280" width="525" height="280" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="el src" data-nodes="A 0" ><path d="M 0.0 120.0 L 0.0 75.0 M 0.0 45.0 L 0.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="0.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><text x="0.0" y="53.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="0.0" y="66.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">−</text><text x="26.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">10 V</text></g>
+<g class="wire" data-nodes="A" ><path d="M 0.0 0.0 L 90.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="A B" ><path d="M 90.0 0.0 L 113.0 0.0 L 116.7 7.0 L 124.0 -7.0 L 131.3 7.0 L 138.7 -7.0 L 146.0 7.0 L 153.3 -7.0 L 157.0 0.0 L 180.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="135.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">R1</text></g>
+<g class="wire" data-nodes="B" ><path d="M 180.0 0.0 L 270.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="wire" data-nodes="B" ><path d="M 270.0 0.0 L 360.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="B 0" ><path d="M 180.0 0.0 L 180.0 38.0 L 173.0 41.7 L 187.0 49.0 L 173.0 56.3 L 187.0 63.7 L 173.0 71.0 L 187.0 78.3 L 180.0 82.0 L 180.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="200.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">R2</text></g>
+<g class="el" data-nodes="B 0" ><path d="M 360.0 0.0 L 360.0 38.0 L 353.0 41.7 L 367.0 49.0 L 353.0 56.3 L 367.0 63.7 L 353.0 71.0 L 367.0 78.3 L 360.0 82.0 L 360.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="380.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">R3</text></g>
+<g class="wire" data-nodes="B" ><path d="M 270.0 0.0 L 270.0 60.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el src" data-nodes="B 0" ><path d="M 270.0 60.0 L 270.0 75.0 M 270.0 105.0 L 270.0 120.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="270.0" cy="90.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="270.0" y1="99.0" x2="270.0" y2="81.0" stroke="currentColor" stroke-width="2"/><polygon points="270.0,78.0 273.9,85.0 266.1,85.0" fill="currentColor" stroke="none"/><text x="296.0" y="90.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">1 A</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 120.0 L 360.0 120.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 120 120 L 120 132 M 108 132 L 132 132 M 112 137 L 128 137 M 116 142 L 124 142" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="A" data-node="A"><circle cx="0" cy="0" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="B" data-node="B"><circle cx="180" cy="0" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="B" data-node="B"><circle cx="270.0" cy="0" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="B" data-node="B"><circle cx="360" cy="0" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="180" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="270.0" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="360" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="0" cy="120" r="4" fill="currentColor"/></g></svg><figcaption>How many nodes? Click "Colour the nodes" to check.</figcaption></figure>
+  <div class="panel">
+    <h4>Count first, then check</h4>
+    <p class="hint">Trace with your finger. Each colour is one node. Dots at junctions are not extra nodes — they just mark where wires meet.</p>
+    <div class="btnrow"><button class="btn primary" id="colorNodes">Colour the nodes</button></div>
+    <div id="nodesAnswer" hidden>
+      <p><span class="nodecolor" style="background:var(--n1)"></span><b>A</b>: the top of the 10 V source up to R1.</p>
+      <p><span class="nodecolor" style="background:var(--n2)"></span><b>B</b>: the entire top wire after R1 — it touches R1, R2, the 1 A source and R3. Four elements, <em>one</em> node.</p>
+      <p><span class="nodecolor" style="background:var(--n3)"></span><b>0</b>: the whole bottom wire, which we take as reference (ground).</p>
+      <p><b>3 nodes.</b> Of those, only A and B are unknown, and A is fixed at 10 V by the source — so there is only <b>one</b> unknown, B.</p>
+    </div>
+  </div>
+</div>
+<div class="tutor"><span class="eyebrow">Check for understanding</span>
+<p>Before colouring, ask her to count. If she says 5 or 7 she is counting dots. Have her physically trace the top wire with a finger. Then ask: "Where would you put ground, and why?" (Bottom wire — it touches the most elements and one end of the voltage source.) Then: "Which node voltages do we already know?" (A = 10 V.)</p></div>
+
+<h3>0.5 Power — one sentence for now</h3>
+<p>Power absorbed by an element is <span class="eq"><i>p</i> = <i>v</i>·<i>i</i></span> <em>when the current arrow enters the + side of the voltage</em> (this is the <b>passive sign convention</b>). Positive means it absorbs power (like every resistor); negative means it delivers power (like a battery doing its job). We'll come back to this in Block 5 because the quiz asks for it, but it's not needed to learn the method.</p>
+</section>
+<section class="block" id="b1">
+<div class="blockhead"><span class="eyebrow">Block 1 · 0:40–1:05</span><h2>Kirchhoff's current law &amp; node voltages</h2></div>
+<p class="goal"><b>Goal:</b> write a KCL equation at any node using only node voltages, with the signs right every time. This one template is 80% of nodal analysis.</p>
+
+<h3>1.1 KCL: what goes in must come out</h3>
+<figure><svg class="circ" viewBox="-80 -55 405 244.0" width="405" height="244.0" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="nd" data-nodes="n" data-node="n"><circle cx="120" cy="72.0" r="4" fill="currentColor"/><text x="128.0" y="60.0" text-anchor="start" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">n</text></g>
+<g class="wire" data-nodes="n" ><path d="M 12.0 72.0 L 120.0 72.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="wire" data-nodes="n" ><path d="M 120.0 0.0 L 120.0 72.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="wire" data-nodes="n" ><path d="M 120.0 72.0 L 228.0 72.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="wire" data-nodes="n" ><path d="M 120.0 72.0 L 120.0 144.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="ann" data-nodes="" ><line x1="46.0" y1="86.0" x2="74.0" y2="86.0" stroke="var(--accent, #c2410c)" stroke-width="2"/><polygon points="77.0,86.0 70.0,89.8 70.0,82.2" fill="var(--accent, #c2410c)" stroke="none"/><text x="60.0" y="92.0" text-anchor="middle" dominant-baseline="hanging" font-size="14" fill="var(--accent, #c2410c)" class="ann"></text></g>
+<text x="60.0" y="93.0" text-anchor="middle" dominant-baseline="central" font-size="14" fill="currentColor" class="ann">3 A in</text>
+<g class="ann" data-nodes="" ><line x1="106.0" y1="22.0" x2="106.0" y2="50.0" stroke="var(--accent, #c2410c)" stroke-width="2"/><polygon points="106.0,53.0 102.2,46.0 109.8,46.0" fill="var(--accent, #c2410c)" stroke="none"/><text x="96.0" y="36.0" text-anchor="end" dominant-baseline="central" font-size="14" fill="var(--accent, #c2410c)" class="ann"></text></g>
+<text x="93.0" y="36.0" text-anchor="middle" dominant-baseline="central" font-size="14" fill="currentColor" class="ann">5 A in</text>
+<g class="ann" data-nodes="" ><line x1="166.0" y1="86.0" x2="194.0" y2="86.0" stroke="var(--accent, #c2410c)" stroke-width="2"/><polygon points="197.0,86.0 190.0,89.8 190.0,82.2" fill="var(--accent, #c2410c)" stroke="none"/><text x="180.0" y="92.0" text-anchor="middle" dominant-baseline="hanging" font-size="14" fill="var(--accent, #c2410c)" class="ann"></text></g>
+<text x="180.0" y="93.0" text-anchor="middle" dominant-baseline="central" font-size="14" fill="currentColor" class="ann">i = ?</text>
+<g class="ann" data-nodes="" ><line x1="134.0" y1="94.0" x2="134.0" y2="122.0" stroke="var(--accent, #c2410c)" stroke-width="2"/><polygon points="134.0,125.0 130.2,118.0 137.8,118.0" fill="var(--accent, #c2410c)" stroke="none"/><text x="144.0" y="108.0" text-anchor="start" dominant-baseline="central" font-size="14" fill="var(--accent, #c2410c)" class="ann"></text></g>
+<text x="150.0" y="111.0" text-anchor="middle" dominant-baseline="central" font-size="14" fill="currentColor" class="ann">2 A out</text></svg><figcaption>Charge can't pile up at a node, so the currents in equal the currents out.</figcaption></figure>
+<p>At every node, <b>the sum of currents leaving = the sum of currents entering</b>. Equivalently, if we call "leaving" positive and "entering" negative, <b>the sum of all currents at a node is zero</b>. In the figure: 3 A + 5 A enter, 2 A leaves, so the unknown must carry 6 A out.</p>
+
+<h3>1.2 Putting Rule 1 and KCL together</h3>
+<p>Now the trick that makes nodal analysis work. Stand on a node whose voltage is <span class="eq"><i>v</i><sub>n</sub></span>. Every resistor attached to it leads to some other node <span class="eq"><i>v</i><sub>m</sub></span>. By Rule 1, the current <em>leaving through that resistor</em> is <span class="eq">(<i>v</i><sub>n</sub> − <i>v</i><sub>m</sub>)/<i>R</i></span> — always "me minus neighbour". You never need to guess a direction: you always point the arrow away from the node you're standing on.</p>
+
+<div class="rule"><h4>Rule 2 — the KCL template (write this at every unknown node)</h4>
+<div class="eqblock">
+<div><span class="lab">at node n</span> Σ (<i>v</i><sub>n</sub> − <i>v</i><sub>neighbour</sub>)/<i>R</i> &nbsp;+&nbsp; Σ (current-source terms) = 0</div>
+</div>
+<p><b>Resistor to a neighbour</b>: <span class="eq">(<i>v</i><sub>n</sub> − <i>v</i><sub>m</sub>)/<i>R</i></span>. &nbsp; <b>Resistor to ground</b>: <span class="eq"><i>v</i><sub>n</sub>/<i>R</i></span> (because ground is 0). &nbsp; <b>Current source with the arrow pointing <em>into</em> the node</b>: write <span class="eq">− <i>I</i></span>. &nbsp; <b>Arrow pointing <em>out of</em> the node</b>: write <span class="eq">+ <i>I</i></span>.</p>
+<p>Some people prefer "resistor currents leaving = source currents entering", i.e. move the sources to the right-hand side with the opposite sign. Same equation. Pick one form and use it all day.</p></div>
+
+<div class="tutor"><span class="eyebrow">Tutor · say it this way</span>
+<p>"Stand on the node. Look down each wire. Through a resistor, current leaves you at (me − them)/R. A current source pointing at you is bringing current <em>in</em>, so on the 'leaving' side it's negative." Have her say "me minus them" out loud while writing each term for the rest of the day. It kills 90% of sign errors.</p></div>
+
+<div class="quiz" data-answer="2">
+  <div class="q">You are writing KCL at node <span class="eq"><i>v</i><sub>2</sub></span>. A 4 A current source is connected between ground and <span class="eq"><i>v</i><sub>2</sub></span>, arrow pointing up into <span class="eq"><i>v</i><sub>2</sub></span>. Using the "everything leaving = 0" form, what do you write for that source?</div>
+  <div class="opts"><button>+4</button><button>+ 4/<i>R</i></button><button>−4</button><button>0 — current sources don't appear in KCL</button></div>
+  <div class="fb" data-ok="Yes. The arrow brings 4 A into the node, so on the 'leaving' side it's −4." data-no="The arrow points INTO the node: it delivers 4 A. Leaving-side sign is −4. (No resistance is involved — a current source term never has an R.)"></div>
+</div>
+
+<div class="turn"><h3><span class="tag">Your turn</span> Your first full solve</h3>
+<figure><svg id="figI1" class="circ" viewBox="-80 -55 405 220" width="405" height="220" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="el src" data-nodes="v 0" ><path d="M 0.0 120.0 L 0.0 75.0 M 0.0 45.0 L 0.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="0.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="0.0" y1="69.0" x2="0.0" y2="51.0" stroke="currentColor" stroke-width="2"/><polygon points="0.0,48.0 3.9,55.0 -3.9,55.0" fill="currentColor" stroke="none"/><text x="26.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">2 A</text></g>
+<g class="wire" data-nodes="v" ><path d="M 0.0 0.0 L 240.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="v 0" ><path d="M 120.0 0.0 L 120.0 38.0 L 113.0 41.7 L 127.0 49.0 L 113.0 56.3 L 127.0 63.7 L 113.0 71.0 L 127.0 78.3 L 120.0 82.0 L 120.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="140.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">10 Ω</text></g>
+<g class="el" data-nodes="v 0" ><path d="M 240.0 0.0 L 240.0 38.0 L 233.0 41.7 L 247.0 49.0 L 233.0 56.3 L 247.0 63.7 L 233.0 71.0 L 247.0 78.3 L 240.0 82.0 L 240.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="260.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">40 Ω</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 120.0 L 240.0 120.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 60 120 L 60 132 M 48 132 L 72 132 M 52 137 L 68 137 M 56 142 L 64 142" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="v" data-node="v"><circle cx="120" cy="0" r="4" fill="currentColor"/><text x="112.0" y="-12.0" text-anchor="end" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v</text></g>
+<g class="nd" data-nodes="v" data-node="v"><circle cx="240" cy="0" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="120" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="240" cy="120" r="4" fill="currentColor"/></g></svg></figure>
+<p>There is exactly one unknown node, <span class="eq"><i>v</i></span> (the whole top wire). On paper: <b>(1)</b> write the KCL template at <span class="eq"><i>v</i></span> — three terms; <b>(2)</b> solve for <span class="eq"><i>v</i></span>; <b>(3)</b> find the current in each resistor and check that they add up to 2 A.</p>
+<details class="rv"><summary>Check the equation</summary><div class="in">
+<div class="eqblock"><div><span class="lab">at v</span> <i>v</i>/10 + <i>v</i>/40 − 2 = 0</div></div>
+<p>10 Ω to ground → <span class="eq"><i>v</i>/10</span>. 40 Ω to ground → <span class="eq"><i>v</i>/40</span>. The 2 A source points <em>into</em> the node → −2.</p></div></details>
+<details class="rv"><summary>Check the answer</summary><div class="in">
+<div class="eqblock"><div><i>v</i> (1/10 + 1/40) = 2 &nbsp;→&nbsp; <i>v</i> · 5/40 = 2 &nbsp;→&nbsp; <span class="res"><i>v</i> = 16 V</span></div>
+<div><span class="lab">check</span> 16/10 = 1.6 A, &nbsp;16/40 = 0.4 A, &nbsp;1.6 + 0.4 = 2 A ✓</div></div>
+<p>That final check — plug the answer back into KCL — is something you should do on the quiz every time. It takes 20 seconds and catches sign errors.</p></div></details>
+</div>
+</section>
+<section class="block" id="b2">
+<div class="blockhead"><span class="eyebrow">Block 2 · 1:15–2:00</span><h2>The nodal recipe</h2></div>
+<p class="goal"><b>Goal:</b> run the full five-step method on circuits with resistors and current sources, including a 3-node circuit that needs three simultaneous equations.</p>
+
+<h3>2.1 Why we need a method</h3>
+<p>Series/parallel simplification and voltage/current division only work on ladder-shaped circuits. The moment a circuit has a bridge, a source in the middle, or a dependent source, they fail. Nodal analysis is a <em>systematic</em> method: it always works, it always produces exactly as many equations as unknowns, and — the important part for a quiz — it always looks the same, so you can do it under time pressure.</p>
+
+<div class="rule"><h4>The recipe (from the course slides, in the order you'll actually do it)</h4>
+<ol>
+  <li><b>Find the nodes. Choose a reference node</b> (ground, 0 V). Best choice: the node touching the most elements, or the − end of a voltage source.</li>
+  <li><b>Label every other node</b> <span class="eq"><i>v</i><sub>1</sub>, <i>v</i><sub>2</sub>, …</span> If a voltage source connects a node straight to ground, that node's voltage is already known — write the number, not a symbol.</li>
+  <li><b>Write KCL at every unknown node</b> using the Rule 2 template ("me minus them over R", sources ± I).</li>
+  <li><b>Clear the fractions and put in standard form</b>: multiply each equation by the smallest number that kills all denominators, collect the <span class="eq"><i>v</i></span>'s on the left, numbers on the right.</li>
+  <li><b>Solve</b> the simultaneous equations (substitution, elimination, or the equation mode on your calculator). <b>Then answer the actual question</b>: the current or voltage asked for, using Rule 1. Finally plug back into one KCL to check.</li>
+</ol></div>
+
+<div class="worked" data-worked>
+<header><h3>Worked example A — two nodes, current sources only</h3><span class="src">original · same shape as slide example 2</span></header>
+<div class="body">
+<figure><svg id="figI2" class="circ" viewBox="-80 -55 525 220" width="525" height="220" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="el src" data-nodes="v1 0" ><path d="M 0.0 120.0 L 0.0 75.0 M 0.0 45.0 L 0.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="0.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="0.0" y1="69.0" x2="0.0" y2="51.0" stroke="currentColor" stroke-width="2"/><polygon points="0.0,48.0 3.9,55.0 -3.9,55.0" fill="currentColor" stroke="none"/><text x="26.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">3 A</text></g>
+<g class="wire" data-nodes="v1" ><path d="M 0.0 0.0 L 120.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="v1 0" ><path d="M 120.0 0.0 L 120.0 38.0 L 113.0 41.7 L 127.0 49.0 L 113.0 56.3 L 127.0 63.7 L 113.0 71.0 L 127.0 78.3 L 120.0 82.0 L 120.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="140.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">4 Ω</text></g>
+<g class="el" data-nodes="v1 v2" ><path d="M 120.0 0.0 L 158.0 0.0 L 161.7 7.0 L 169.0 -7.0 L 176.3 7.0 L 183.7 -7.0 L 191.0 7.0 L 198.3 -7.0 L 202.0 0.0 L 240.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="180.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">2 Ω</text></g>
+<g class="el" data-nodes="v2 0" ><path d="M 240.0 0.0 L 240.0 38.0 L 233.0 41.7 L 247.0 49.0 L 233.0 56.3 L 247.0 63.7 L 233.0 71.0 L 247.0 78.3 L 240.0 82.0 L 240.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="260.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">4 Ω</text></g>
+<g class="wire" data-nodes="v2" ><path d="M 240.0 0.0 L 360.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el src" data-nodes="v2 0" ><path d="M 360.0 120.0 L 360.0 75.0 M 360.0 45.0 L 360.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="360.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="360.0" y1="69.0" x2="360.0" y2="51.0" stroke="currentColor" stroke-width="2"/><polygon points="360.0,48.0 363.9,55.0 356.1,55.0" fill="currentColor" stroke="none"/><text x="386.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">1 A</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 120.0 L 360.0 120.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 180 120 L 180 132 M 168 132 L 192 132 M 172 137 L 188 137 M 176 142 L 184 142" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="v1" data-node="v1"><circle cx="120" cy="0" r="4" fill="currentColor"/><text x="112.0" y="-12.0" text-anchor="end" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v1</text></g>
+<g class="nd" data-nodes="v2" data-node="v2"><circle cx="240" cy="0" r="4" fill="currentColor"/><text x="248.0" y="-12.0" text-anchor="start" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v2</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="120" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="240" cy="120" r="4" fill="currentColor"/></g></svg></figure>
+<ol class="steps">
+  <li><h4>Nodes and reference</h4><p>Three nodes: the top-left wire (<span class="eq"><i>v</i><sub>1</sub></span>), the top-right wire (<span class="eq"><i>v</i><sub>2</sub></span>), and the entire bottom wire. The bottom wire touches every element, so it's the natural ground. Two unknowns → we need two equations.</p></li>
+  <li><h4>KCL at <span class="eq"><i>v</i><sub>1</sub></span> — stand on the node, look down each wire</h4>
+    <p>4 Ω down to ground: <span class="eq"><i>v</i><sub>1</sub>/4</span>. &nbsp;2 Ω across to <span class="eq"><i>v</i><sub>2</sub></span>: <span class="eq">(<i>v</i><sub>1</sub> − <i>v</i><sub>2</sub>)/2</span>. &nbsp;3 A source pointing into the node: −3.</p>
+    <div class="eqblock"><div><span class="lab">node 1</span> <i>v</i><sub>1</sub>/4 + (<i>v</i><sub>1</sub> − <i>v</i><sub>2</sub>)/2 − 3 = 0</div></div></li>
+  <li><h4>KCL at <span class="eq"><i>v</i><sub>2</sub></span></h4>
+    <p>2 Ω back to <span class="eq"><i>v</i><sub>1</sub></span>: <span class="eq">(<i>v</i><sub>2</sub> − <i>v</i><sub>1</sub>)/2</span> — notice it's "me minus them" again, so the order flips compared with the previous equation. 4 Ω to ground: <span class="eq"><i>v</i><sub>2</sub>/4</span>. 1 A source into the node: −1.</p>
+    <div class="eqblock"><div><span class="lab">node 2</span> (<i>v</i><sub>2</sub> − <i>v</i><sub>1</sub>)/2 + <i>v</i><sub>2</sub>/4 − 1 = 0</div></div></li>
+  <li><h4>Standard form (multiply both by 4)</h4>
+    <div class="eqblock"><div><span class="lab">(1)</span> 3<i>v</i><sub>1</sub> − 2<i>v</i><sub>2</sub> = 12</div><div><span class="lab">(2)</span> −2<i>v</i><sub>1</sub> + 3<i>v</i><sub>2</sub> = 4</div></div>
+    <p>Sanity check that you'll see on every well-formed nodal system: the coefficient of the node's own voltage is positive and biggest; the neighbours' coefficients are negative. If a sign breaks that pattern, look for an error.</p></li>
+  <li><h4>Solve</h4>
+    <div class="eqblock"><div>from (1): <i>v</i><sub>1</sub> = (12 + 2<i>v</i><sub>2</sub>)/3</div><div>into (2): −2(12 + 2<i>v</i><sub>2</sub>)/3 + 3<i>v</i><sub>2</sub> = 4 &nbsp;→&nbsp; −24 − 4<i>v</i><sub>2</sub> + 9<i>v</i><sub>2</sub> = 12 &nbsp;→&nbsp; 5<i>v</i><sub>2</sub> = 36</div><div><span class="res"><i>v</i><sub>2</sub> = 7.2 V, &nbsp;<i>v</i><sub>1</sub> = 8.8 V</span></div></div></li>
+  <li><h4>Answer the question &amp; check</h4>
+    <p>Current in the 2 Ω resistor, left to right: <span class="eq">(8.8 − 7.2)/2 = 0.8 A</span>. Check KCL at node 1: <span class="eq">8.8/4 + 0.8 = 2.2 + 0.8 = 3 A</span> — exactly the source current. ✓</p></li>
+</ol>
+<div class="stepctl"><button class="btn primary" data-next>Reveal next step</button><button class="btn" data-all>Show all</button><span class="cnt"></span></div>
+</div></div>
+
+<div class="tutor"><span class="eyebrow">Tutor · how to run a worked example</span>
+<p>Reveal one step at a time and, before each reveal, ask her to <em>predict</em> it on paper: "Write KCL at node 1 before I show it." Compare, then reveal. Step 4's pattern (own coefficient positive and largest, neighbours negative) is worth 2 minutes — it's her fastest error detector on the quiz.</p></div>
+
+<h3>2.2 Build the equations by clicking — three nodes</h3>
+<p>This is slide example 5. Click a node in the diagram (or a button) to see the elements attached to it and the term each contributes. Use it to <em>check</em> equations you've written, not to write them for you.</p>
+<div class="explorer" data-circ="S5">
+  <figure><svg id="figS5" class="circ" viewBox="-80 -55 405 280" width="405" height="280" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="wire" data-nodes="v1" ><path d="M 0.0 60.0 L 0.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="v1 v3" ><path d="M 0.0 0.0 L 98.0 0.0 L 101.7 7.0 L 109.0 -7.0 L 116.3 7.0 L 123.7 -7.0 L 131.0 7.0 L 138.3 -7.0 L 142.0 0.0 L 240.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="120.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">20 Ω</text></g>
+<g class="wire" data-nodes="v3" ><path d="M 240.0 0.0 L 240.0 60.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="ann" data-nodes="" ><line x1="106.0" y1="22.0" x2="134.0" y2="22.0" stroke="var(--accent, #c2410c)" stroke-width="2"/><polygon points="137.0,22.0 130.0,25.9 130.0,18.1" fill="var(--accent, #c2410c)" stroke="none"/><text x="120.0" y="28.0" text-anchor="middle" dominant-baseline="hanging" font-size="14" fill="var(--accent, #c2410c)" class="ann">ix</text></g>
+<g class="el" data-nodes="v1 v2" ><path d="M 0.0 60.0 L 38.0 60.0 L 41.7 67.0 L 49.0 53.0 L 56.3 67.0 L 63.7 53.0 L 71.0 67.0 L 78.3 53.0 L 82.0 60.0 L 120.0 60.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="60.0" y="40.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">5 Ω</text></g>
+<g class="el" data-nodes="v2 v3" ><path d="M 120.0 60.0 L 158.0 60.0 L 161.7 67.0 L 169.0 53.0 L 176.3 67.0 L 183.7 53.0 L 191.0 67.0 L 198.3 53.0 L 202.0 60.0 L 240.0 60.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="180.0" y="40.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">10 Ω</text></g>
+<g class="el" data-nodes="v1 0" ><path d="M 0.0 60.0 L 0.0 98.0 L -7.0 101.7 L 7.0 109.0 L -7.0 116.3 L 7.0 123.7 L -7.0 131.0 L 7.0 138.3 L 0.0 142.0 L 0.0 180.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="-20.0" y="120.0" text-anchor="end" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">10 Ω</text></g>
+<g class="el src" data-nodes="v2 0" ><path d="M 120.0 180.0 L 120.0 135.0 M 120.0 105.0 L 120.0 60.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="120.0" cy="120.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="120.0" y1="129.0" x2="120.0" y2="111.0" stroke="currentColor" stroke-width="2"/><polygon points="120.0,108.0 123.8,115.0 116.2,115.0" fill="currentColor" stroke="none"/><text x="144.0" y="120.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">10 A</text></g>
+<g class="el" data-nodes="v3 0" ><path d="M 240.0 60.0 L 240.0 98.0 L 233.0 101.7 L 247.0 109.0 L 233.0 116.3 L 247.0 123.7 L 233.0 131.0 L 247.0 138.3 L 240.0 142.0 L 240.0 180.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="260.0" y="120.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">5 Ω</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 180.0 L 240.0 180.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 60 180 L 60 192 M 48 192 L 72 192 M 52 197 L 68 197 M 56 202 L 64 202" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="v1" data-node="v1"><circle cx="0" cy="60" r="4" fill="currentColor"/><text x="-12.0" y="60.0" text-anchor="end" dominant-baseline="central" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v1</text></g>
+<g class="nd" data-nodes="v2" data-node="v2"><circle cx="120" cy="60" r="4" fill="currentColor"/><text x="112.0" y="72.0" text-anchor="end" dominant-baseline="hanging" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v2</text></g>
+<g class="nd" data-nodes="v3" data-node="v3"><circle cx="240" cy="60" r="4" fill="currentColor"/><text x="252.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v3</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="120" cy="180" r="4" fill="currentColor"/></g></svg><figcaption>Slide example 5 — find <i>i</i><sub>x</sub>. Click a node.</figcaption></figure>
+  <div class="panel">
+    <div class="nodebtns"><button data-node="v1">v1</button><button data-node="v2">v2</button><button data-node="v3">v3</button></div>
+    <div class="out"><p class="hint">Pick a node to see its KCL terms.</p></div>
+  </div>
+</div>
+
+<div class="turn"><h3><span class="tag">Your turn</span> Write all three equations, then solve for <i>i</i><sub>x</sub></h3>
+<p>On paper: three KCL equations (check each against the explorer above), clear fractions, solve, then <span class="eq"><i>i</i><sub>x</sub> = (<i>v</i><sub>1</sub> − <i>v</i><sub>3</sub>)/20</span>. Target from the slides: <span class="eq"><i>i</i><sub>x</sub> = 0.909 A</span>.</p>
+<details class="rv"><summary>Check the three KCL equations</summary><div class="in">
+<div class="eqblock">
+<div><span class="lab">node 1</span> <i>v</i><sub>1</sub>/10 + (<i>v</i><sub>1</sub> − <i>v</i><sub>2</sub>)/5 + (<i>v</i><sub>1</sub> − <i>v</i><sub>3</sub>)/20 = 0</div>
+<div><span class="lab">node 2</span> (<i>v</i><sub>2</sub> − <i>v</i><sub>1</sub>)/5 + (<i>v</i><sub>2</sub> − <i>v</i><sub>3</sub>)/10 − 10 = 0</div>
+<div><span class="lab">node 3</span> <i>v</i><sub>3</sub>/5 + (<i>v</i><sub>3</sub> − <i>v</i><sub>2</sub>)/10 + (<i>v</i><sub>3</sub> − <i>v</i><sub>1</sub>)/20 = 0</div>
+</div></div></details>
+<details class="rv"><summary>Check the standard form</summary><div class="in">
+<div class="eqblock">
+<div><span class="lab">×20</span> 7<i>v</i><sub>1</sub> − 4<i>v</i><sub>2</sub> − <i>v</i><sub>3</sub> = 0</div>
+<div><span class="lab">×10</span> −2<i>v</i><sub>1</sub> + 3<i>v</i><sub>2</sub> − <i>v</i><sub>3</sub> = 100</div>
+<div><span class="lab">×20</span> −<i>v</i><sub>1</sub> − 2<i>v</i><sub>2</sub> + 7<i>v</i><sub>3</sub> = 0</div>
+</div>
+<p>Look at the pattern: diagonal 7, 3, 7 positive; everything off-diagonal negative; the only number on the right is the current source. That's what a healthy nodal system looks like.</p></div></details>
+<details class="rv"><summary>Check the answer</summary><div class="in">
+<div class="eqblock"><div><span class="res"><i>v</i><sub>1</sub> = 45.45 V, &nbsp;<i>v</i><sub>2</sub> = 72.73 V, &nbsp;<i>v</i><sub>3</sub> = 27.27 V</span></div>
+<div><i>i</i><sub>x</sub> = (45.45 − 27.27)/20 = <span class="res">0.909 A</span></div>
+<div><span class="lab">check node 2</span> (72.73 − 45.45)/5 + (72.73 − 27.27)/10 = 5.45 + 4.55 = 10 A ✓</div></div>
+<p>Solving 3×3 by hand: from eq. 1, <span class="eq"><i>v</i><sub>3</sub> = 7<i>v</i><sub>1</sub> − 4<i>v</i><sub>2</sub></span>; substitute into the other two to get a 2×2 system in <span class="eq"><i>v</i><sub>1</sub>, <i>v</i><sub>2</sub></span>. If your calculator has an equation solver (Casio: <kbd>MODE</kbd> → EQN → 3 unknowns), use it — but the quiz marks the <em>equations</em>, so always write them first.</p></div></details>
+</div>
+
+<div class="tutor"><span class="eyebrow">Tutor · 3×3 solving</span>
+<p>Find out now whether she'll have a calculator with an equation solver on quiz day and practise entering a 3×3 in it. If not, drill the "solve one equation for a variable, substitute into the other two" routine twice today — it is the slowest part of every quiz question and the place where arithmetic slips happen. Also make sure she rounds only at the end and writes decimals (quiz instruction: "All answers must be written using decimal numbers").</p></div>
+</section>
+<section class="block" id="b3">
+<div class="blockhead"><span class="eyebrow">Block 3 · 2:00–2:40</span><h2>Voltage sources &amp; supernodes</h2></div>
+<p class="goal"><b>Goal:</b> recognise the two cases for a voltage source in nodal analysis — <b>grounded</b> (a node you already know) and <b>floating</b> (a supernode) — and handle both without hesitation.</p>
+
+<p>Voltage sources are awkward for KCL for one reason: <em>you don't know the current through them</em> (Block 0). So you can't write a "current leaving through the source" term. There are exactly two situations, and each has a fix.</p>
+
+<h3>3.1 Case A — one end of the source is at ground: the node is known</h3>
+<p>If a voltage source sits between ground and node a, then <span class="eq"><i>v</i><sub>a</sub></span> is simply the source value (with its sign: + side up means <span class="eq"><i>v</i><sub>a</sub></span> = +12 V). You don't write KCL at that node at all — you have one fewer unknown. The current through the source, if the question asks, comes at the very end from KCL at that node.</p>
+
+<div class="worked" data-worked>
+<header><h3>Worked example B — grounded source</h3><span class="src">original</span></header>
+<div class="body">
+<figure><svg id="figG1" class="circ" viewBox="-80 -55 465 220" width="465" height="220" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="el src" data-nodes="a 0" ><path d="M 0.0 120.0 L 0.0 75.0 M 0.0 45.0 L 0.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="0.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><text x="0.0" y="53.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="0.0" y="66.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">−</text><text x="26.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">12 V</text></g>
+<g class="wire" data-nodes="a" ><path d="M 0.0 0.0 L 60.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="a b" ><path d="M 60.0 0.0 L 98.0 0.0 L 101.7 7.0 L 109.0 -7.0 L 116.3 7.0 L 123.7 -7.0 L 131.0 7.0 L 138.3 -7.0 L 142.0 0.0 L 180.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="120.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">3 Ω</text></g>
+<g class="el" data-nodes="b 0" ><path d="M 180.0 0.0 L 180.0 38.0 L 173.0 41.7 L 187.0 49.0 L 173.0 56.3 L 187.0 63.7 L 173.0 71.0 L 187.0 78.3 L 180.0 82.0 L 180.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="200.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">6 Ω</text></g>
+<g class="wire" data-nodes="b" ><path d="M 180.0 0.0 L 300.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el src" data-nodes="b 0" ><path d="M 300.0 120.0 L 300.0 75.0 M 300.0 45.0 L 300.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="300.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="300.0" y1="69.0" x2="300.0" y2="51.0" stroke="currentColor" stroke-width="2"/><polygon points="300.0,48.0 303.9,55.0 296.1,55.0" fill="currentColor" stroke="none"/><text x="326.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">1 A</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 120.0 L 300.0 120.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 120 120 L 120 132 M 108 132 L 132 132 M 112 137 L 128 137 M 116 142 L 124 142" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="a" data-node="a"><circle cx="60" cy="0" r="4" fill="currentColor"/><text x="60.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">a</text></g>
+<g class="nd" data-nodes="b" data-node="b"><circle cx="180" cy="0" r="4" fill="currentColor"/><text x="188.0" y="-12.0" text-anchor="start" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">b</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="180" cy="120" r="4" fill="currentColor"/></g></svg></figure>
+<ol class="steps">
+  <li><h4>Nodes</h4><p>Ground = bottom wire. Node a is fixed by the source: <span class="eq"><i>v</i><sub>a</sub> = 12 V</span>. Only <span class="eq"><i>v</i><sub>b</sub></span> is unknown. One equation.</p></li>
+  <li><h4>KCL at b</h4><div class="eqblock"><div><span class="lab">node b</span> (<i>v</i><sub>b</sub> − 12)/3 + <i>v</i><sub>b</sub>/6 − 1 = 0</div><div><span class="lab">×6</span> 2<i>v</i><sub>b</sub> − 24 + <i>v</i><sub>b</sub> = 6 &nbsp;→&nbsp; <span class="res"><i>v</i><sub>b</sub> = 10 V</span></div></div>
+  <p>The known node appears in the equation as a <em>number</em>, "me minus 12", never as a symbol.</p></li>
+  <li><h4>Anything else asked, then check</h4><p>Current through the 3 Ω from a to b: (12 − 10)/3 = 0.667 A. Current out of the 12 V source = the same 0.667 A (it's the only thing attached to a besides ground). Check at b: 0.667 in from the resistor + 1 in from the source = 1.667 A out through 6 Ω = 10/6 = 1.667 ✓.</p></li>
+</ol>
+<div class="stepctl"><button class="btn primary" data-next>Reveal next step</button><button class="btn" data-all>Show all</button><span class="cnt"></span></div>
+</div></div>
+
+<div class="turn"><h3><span class="tag">Your turn</span> Slide example 9 — find <i>i</i><sub>b</sub></h3>
+<figure><svg id="figS9" class="circ" viewBox="-80 -55 405 280" width="405" height="280" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="wire" data-nodes="a" ><path d="M 0.0 60.0 L 0.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="a c" ><path d="M 0.0 0.0 L 98.0 0.0 L 101.7 7.0 L 109.0 -7.0 L 116.3 7.0 L 123.7 -7.0 L 131.0 7.0 L 138.3 -7.0 L 142.0 0.0 L 240.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="120.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">5 Ω</text></g>
+<g class="wire" data-nodes="c" ><path d="M 240.0 0.0 L 240.0 60.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el src" data-nodes="a 0" ><path d="M 0.0 180.0 L 0.0 135.0 M 0.0 105.0 L 0.0 60.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="0.0" cy="120.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><text x="0.0" y="113.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="0.0" y="126.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">−</text><text x="-26.0" y="120.0" text-anchor="end" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">25 V</text></g>
+<g class="el" data-nodes="a b" ><path d="M 0.0 60.0 L 38.0 60.0 L 41.7 67.0 L 49.0 53.0 L 56.3 67.0 L 63.7 53.0 L 71.0 67.0 L 78.3 53.0 L 82.0 60.0 L 120.0 60.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="60.0" y="40.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">10 Ω</text></g>
+<g class="el" data-nodes="b c" ><path d="M 120.0 60.0 L 158.0 60.0 L 161.7 67.0 L 169.0 53.0 L 176.3 67.0 L 183.7 53.0 L 191.0 67.0 L 198.3 53.0 L 202.0 60.0 L 240.0 60.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="180.0" y="40.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">20 Ω</text></g>
+<g class="ann" data-nodes="" ><line x1="166.0" y1="82.0" x2="194.0" y2="82.0" stroke="var(--accent, #c2410c)" stroke-width="2"/><polygon points="197.0,82.0 190.0,85.8 190.0,78.2" fill="var(--accent, #c2410c)" stroke="none"/><text x="180.0" y="88.0" text-anchor="middle" dominant-baseline="hanging" font-size="14" fill="var(--accent, #c2410c)" class="ann">ib</text></g>
+<g class="el" data-nodes="b 0" ><path d="M 120.0 60.0 L 120.0 98.0 L 113.0 101.7 L 127.0 109.0 L 113.0 116.3 L 127.0 123.7 L 113.0 131.0 L 127.0 138.3 L 120.0 142.0 L 120.0 180.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="140.0" y="120.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">10 Ω</text></g>
+<g class="el" data-nodes="c 0" ><path d="M 240.0 60.0 L 240.0 98.0 L 233.0 101.7 L 247.0 109.0 L 233.0 116.3 L 247.0 123.7 L 233.0 131.0 L 247.0 138.3 L 240.0 142.0 L 240.0 180.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="260.0" y="120.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">20 Ω</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 180.0 L 240.0 180.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 60 180 L 60 192 M 48 192 L 72 192 M 52 197 L 68 197 M 56 202 L 64 202" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="a" data-node="a"><circle cx="0" cy="60" r="4" fill="currentColor"/><text x="-12.0" y="60.0" text-anchor="end" dominant-baseline="central" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">a</text></g>
+<g class="nd" data-nodes="b" data-node="b"><circle cx="120" cy="60" r="4" fill="currentColor"/><text x="112.0" y="48.0" text-anchor="end" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">b</text></g>
+<g class="nd" data-nodes="c" data-node="c"><circle cx="240" cy="60" r="4" fill="currentColor"/><text x="252.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">c</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="120" cy="180" r="4" fill="currentColor"/></g></svg></figure>
+<p>Node a is known (25 V). Write KCL at b and c, solve, then <span class="eq"><i>i</i><sub>b</sub> = (<i>v</i><sub>b</sub> − <i>v</i><sub>c</sub>)/20</span>. Slide answer: <span class="eq"><i>i</i><sub>b</sub> = −0.259 A</span>. Before you start: what does the negative sign in the answer mean?</p>
+<details class="rv"><summary>Check the equations</summary><div class="in">
+<div class="eqblock">
+<div><span class="lab">node b</span> (<i>v</i><sub>b</sub> − 25)/10 + <i>v</i><sub>b</sub>/10 + (<i>v</i><sub>b</sub> − <i>v</i><sub>c</sub>)/20 = 0 &nbsp;<span class="num">×20 → 5<i>v</i><sub>b</sub> − <i>v</i><sub>c</sub> = 50</span></div>
+<div><span class="lab">node c</span> (<i>v</i><sub>c</sub> − 25)/5 + (<i>v</i><sub>c</sub> − <i>v</i><sub>b</sub>)/20 + <i>v</i><sub>c</sub>/20 = 0 &nbsp;<span class="num">×20 → −<i>v</i><sub>b</sub> + 6<i>v</i><sub>c</sub> = 100</span></div>
+</div><p>Don't forget the 5 Ω on top — it joins a and c, so it belongs to node c's equation (as "me minus 25 over 5").</p></div></details>
+<details class="rv"><summary>Check the answer</summary><div class="in">
+<div class="eqblock"><div><span class="res"><i>v</i><sub>b</sub> = 13.79 V, &nbsp;<i>v</i><sub>c</sub> = 18.97 V</span></div><div><i>i</i><sub>b</sub> = (13.79 − 18.97)/20 = <span class="res">−0.259 A</span></div></div>
+<p>Negative: the arrow was drawn b → c, but c is higher than b, so 0.259 A actually flows c → b. Write the answer as −0.259 A with the arrow as drawn — that's what the marker wants.</p></div></details>
+</div>
+
+<h3>3.2 Case B — the source floats between two unknown nodes: supernode</h3>
+<p>Now neither end is ground. The source's current is unknown, so KCL at either end alone contains an unknown we can't express. The fix from slide 52: <b>draw a dashed bubble around both nodes and the source</b> and treat the bubble as one big node.</p>
+<div class="rule"><h4>Rule 3 — supernode = one KCL + one KVL</h4>
+<p><b>KCL for the bubble:</b> add up the currents leaving the bubble through <em>everything attached to either node</em>, exactly as in Rule 2, but skip the source inside the bubble (its current enters one node and leaves the other — it cancels).</p>
+<p><b>KVL inside the bubble:</b> <span class="eq"><i>v</i><sub>+ side</sub> − <i>v</i><sub>− side</sub> = <i>V</i><sub>source</sub></span>. That's the equation you "lost".</p>
+<p>Count: two unknown nodes, one KCL (bubble) + one KVL (constraint) = two equations. Always balances.</p></div>
+
+<div class="worked" data-worked>
+<header><h3>Worked example C — slide example 8, find <i>i</i><sub>a</sub></h3><span class="src">DC Part II · slide 66</span></header>
+<div class="body">
+<figure><svg id="figS8" class="circ" viewBox="-80 -55 405 220" width="405" height="220" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="el src" data-nodes="va vb" ><path d="M 0.0 0.0 L 45.0 0.0 M 75.0 0.0 L 120.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="60.0" cy="0.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><text x="66.5" y="0.0" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="53.5" y="0.0" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">−</text><text x="60.0" y="-26.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">10 V</text></g>
+<g class="el" data-nodes="va 0" ><path d="M 0.0 0.0 L 0.0 38.0 L -7.0 41.7 L 7.0 49.0 L -7.0 56.3 L 7.0 63.7 L -7.0 71.0 L 7.0 78.3 L 0.0 82.0 L 0.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="-20.0" y="60.0" text-anchor="end" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">10 Ω</text></g>
+<g class="el" data-nodes="vb 0" ><path d="M 120.0 0.0 L 120.0 38.0 L 113.0 41.7 L 127.0 49.0 L 113.0 56.3 L 127.0 63.7 L 113.0 71.0 L 127.0 78.3 L 120.0 82.0 L 120.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="140.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">5 Ω</text></g>
+<g class="ann" data-nodes="" ><line x1="102.0" y1="46.0" x2="102.0" y2="74.0" stroke="var(--accent, #c2410c)" stroke-width="2"/><polygon points="102.0,77.0 98.2,70.0 105.8,70.0" fill="var(--accent, #c2410c)" stroke="none"/><text x="92.0" y="60.0" text-anchor="end" dominant-baseline="central" font-size="14" fill="var(--accent, #c2410c)" class="ann">ia</text></g>
+<g class="wire" data-nodes="vb" ><path d="M 120.0 0.0 L 240.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el src" data-nodes="vb 0" ><path d="M 240.0 120.0 L 240.0 75.0 M 240.0 45.0 L 240.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="240.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="240.0" y1="69.0" x2="240.0" y2="51.0" stroke="currentColor" stroke-width="2"/><polygon points="240.0,48.0 243.8,55.0 236.2,55.0" fill="currentColor" stroke="none"/><text x="266.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">1 A</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 120.0 L 240.0 120.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 60 120 L 60 132 M 48 132 L 72 132 M 52 137 L 68 137 M 56 142 L 64 142" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="va" data-node="va"><circle cx="0" cy="0" r="4" fill="currentColor"/><text x="0.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">va</text></g>
+<g class="nd" data-nodes="vb" data-node="vb"><circle cx="120" cy="0" r="4" fill="currentColor"/><text x="120.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">vb</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="120" cy="120" r="4" fill="currentColor"/></g></svg></figure>
+<ol class="steps">
+  <li><h4>Spot the case</h4><p>The 10 V source connects <span class="eq"><i>v</i><sub>a</sub></span> to <span class="eq"><i>v</i><sub>b</sub></span> — neither is ground. Floating → supernode {a, b}. Two unknowns.</p></li>
+  <li><h4>KCL for the bubble</h4><p>Elements attached to a or b, other than the 10 V source: 10 Ω from a to ground, 5 Ω from b to ground, the 1 A source into b.</p>
+  <div class="eqblock"><div><span class="lab">supernode</span> <i>v</i><sub>a</sub>/10 + <i>v</i><sub>b</sub>/5 − 1 = 0</div></div></li>
+  <li><h4>KVL inside the bubble</h4><p>The + is on the b side: <span class="eq"><i>v</i><sub>b</sub> − <i>v</i><sub>a</sub> = 10</span>. (Slide 66 writes the left node as "V − 10" for exactly this reason — same thing.)</p>
+  <div class="eqblock"><div><span class="lab">constraint</span> <i>v</i><sub>b</sub> − <i>v</i><sub>a</sub> = 10 &nbsp;→&nbsp; <i>v</i><sub>a</sub> = <i>v</i><sub>b</sub> − 10</div></div></li>
+  <li><h4>Solve</h4><div class="eqblock"><div>(<i>v</i><sub>b</sub> − 10)/10 + <i>v</i><sub>b</sub>/5 = 1 &nbsp;<span class="num">×10</span>&nbsp; <i>v</i><sub>b</sub> − 10 + 2<i>v</i><sub>b</sub> = 10 &nbsp;→&nbsp; <span class="res"><i>v</i><sub>b</sub> = 6.667 V, <i>v</i><sub>a</sub> = −3.333 V</span></div><div><i>i</i><sub>a</sub> = <i>v</i><sub>b</sub>/5 = <span class="res">1.333 A</span></div></div>
+  <p>Matches the slide (1.33 A). Note <span class="eq"><i>v</i><sub>a</sub></span> is negative — below ground. Perfectly fine.</p></li>
+  <li><h4>Check</h4><p>Bubble KCL: −3.333/10 + 6.667/5 = −0.333 + 1.333 = 1 A = the source ✓. Bonus: the current through the 10 V source (from a toward b, inside the source) must be the current arriving at a from the 10 Ω: (0 − (−3.333))/10 = 0.333 A. That's how you'd get a source current if asked.</p></li>
+</ol>
+<div class="stepctl"><button class="btn primary" data-next>Reveal next step</button><button class="btn" data-all>Show all</button><span class="cnt"></span></div>
+</div></div>
+
+<div class="turn"><h3><span class="tag">Your turn</span> Slide example 6 with numbers — supernode plus a third node</h3>
+<figure><svg id="figS6n" class="circ" viewBox="-80 -55 465 280" width="465" height="280" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="wire" data-nodes="v1" ><path d="M 0.0 60.0 L 0.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="v1 0" ><path d="M 0.0 0.0 L 98.0 0.0 L 101.7 7.0 L 109.0 -7.0 L 116.3 7.0 L 123.7 -7.0 L 131.0 7.0 L 138.3 -7.0 L 142.0 0.0 L 240.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="120.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">10 Ω</text></g>
+<g class="wire" data-nodes="0" ><path d="M 240.0 0.0 L 240.0 60.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el src" data-nodes="v1 v2" ><path d="M 0.0 60.0 L 45.0 60.0 M 75.0 60.0 L 120.0 60.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="60.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><text x="53.5" y="60.0" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="66.5" y="60.0" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">−</text><text x="60.0" y="34.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">10 V</text></g>
+<g class="el src" data-nodes="0 v2" ><path d="M 240.0 60.0 L 195.0 60.0 M 165.0 60.0 L 120.0 60.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="180.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="189.0" y1="60.0" x2="171.0" y2="60.0" stroke="currentColor" stroke-width="2"/><polygon points="168.0,60.0 175.0,56.1 175.0,63.9" fill="currentColor" stroke="none"/><text x="180.0" y="34.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">1 A</text></g>
+<g class="el" data-nodes="v1 v3" ><path d="M 0.0 60.0 L 0.0 98.0 L -7.0 101.7 L 7.0 109.0 L -7.0 116.3 L 7.0 123.7 L -7.0 131.0 L 7.0 138.3 L 0.0 142.0 L 0.0 180.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="-20.0" y="120.0" text-anchor="end" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">5 Ω</text></g>
+<g class="el" data-nodes="v2 v3" ><path d="M 120.0 60.0 L 120.0 98.0 L 113.0 101.7 L 127.0 109.0 L 113.0 116.3 L 127.0 123.7 L 113.0 131.0 L 127.0 138.3 L 120.0 142.0 L 120.0 180.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="140.0" y="120.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">10 Ω</text></g>
+<g class="el" data-nodes="0 v3" ><path d="M 240.0 60.0 L 240.0 98.0 L 233.0 101.7 L 247.0 109.0 L 233.0 116.3 L 247.0 123.7 L 233.0 131.0 L 247.0 138.3 L 240.0 142.0 L 240.0 180.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="260.0" y="120.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">5 Ω</text></g>
+<g class="wire" data-nodes="0" ><path d="M 240.0 60.0 L 300.0 60.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 300 60 L 300 72 M 288 72 L 312 72 M 292 77 L 308 77 M 296 82 L 304 82" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="wire" data-nodes="v3" ><path d="M 0.0 180.0 L 240.0 180.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="nd" data-nodes="v1" data-node="v1"><circle cx="0" cy="60" r="4" fill="currentColor"/><text x="-12.0" y="60.0" text-anchor="end" dominant-baseline="central" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v1</text></g>
+<g class="nd" data-nodes="v2" data-node="v2"><circle cx="120" cy="60" r="4" fill="currentColor"/><text x="120.0" y="48.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v2</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="240" cy="60" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="v3" data-node="v3"><circle cx="120" cy="180" r="4" fill="currentColor"/><text x="120.0" y="194.0" text-anchor="middle" dominant-baseline="hanging" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v3</text></g>
+<g class="nd" data-nodes="v3" data-node="v3"><circle cx="0" cy="180" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="v3" data-node="v3"><circle cx="240" cy="180" r="4" fill="currentColor"/></g></svg></figure>
+<p>Careful: ground is the <em>right-hand</em> node here (the wire with the ground symbol), and the bottom wire is <span class="eq"><i>v</i><sub>3</sub></span>. Draw the bubble around <span class="eq"><i>v</i><sub>1</sub>, <i>v</i><sub>2</sub></span> and the 10 V source. Write: bubble KCL, node-3 KCL, KVL constraint. Solve.</p>
+<details class="rv"><summary>Check the equations</summary><div class="in">
+<div class="eqblock">
+<div><span class="lab">supernode</span> <i>v</i><sub>1</sub>/10 + (<i>v</i><sub>1</sub> − <i>v</i><sub>3</sub>)/5 + (<i>v</i><sub>2</sub> − <i>v</i><sub>3</sub>)/10 − 1 = 0</div>
+<div><span class="lab">node 3</span> (<i>v</i><sub>3</sub> − <i>v</i><sub>1</sub>)/5 + (<i>v</i><sub>3</sub> − <i>v</i><sub>2</sub>)/10 + <i>v</i><sub>3</sub>/5 = 0</div>
+<div><span class="lab">constraint</span> <i>v</i><sub>1</sub> − <i>v</i><sub>2</sub> = 10 &nbsp;<span class="num">(+ is on the v1 side)</span></div>
+</div>
+<p>The 10 Ω on top goes from <span class="eq"><i>v</i><sub>1</sub></span> to the ground node, so it's <span class="eq"><i>v</i><sub>1</sub>/10</span>. The 1 A source points into <span class="eq"><i>v</i><sub>2</sub></span> (inside the bubble) → −1. The 5 Ω on the right connects ground to <span class="eq"><i>v</i><sub>3</sub></span>: it appears in node 3's equation as <span class="eq"><i>v</i><sub>3</sub>/5</span>. These are exactly the equations on slide 56.</p></div></details>
+<details class="rv"><summary>Check the answer</summary><div class="in">
+<div class="eqblock"><div><span class="lab">×10</span> 3<i>v</i><sub>1</sub> + <i>v</i><sub>2</sub> − 3<i>v</i><sub>3</sub> = 10; &nbsp; −2<i>v</i><sub>1</sub> − <i>v</i><sub>2</sub> + 5<i>v</i><sub>3</sub> = 0; &nbsp; <i>v</i><sub>1</sub> − <i>v</i><sub>2</sub> = 10</div>
+<div><span class="res"><i>v</i><sub>1</sub> = 6.364 V, &nbsp;<i>v</i><sub>2</sub> = −3.636 V, &nbsp;<i>v</i><sub>3</sub> = 1.818 V</span></div>
+<div><span class="lab">check</span> <i>v</i><sub>1</sub> − <i>v</i><sub>2</sub> = 6.364 − (−3.636) = 10 ✓</div></div></div></details>
+</div>
+
+<div class="tutor"><span class="eyebrow">Tutor · watch for these</span>
+<ul>
+<li>Writing a "current through the voltage source" term like <span class="eq">10/<i>R</i></span> inside KCL. There is no R. Stop her and redraw the bubble.</li>
+<li>Getting the constraint sign backwards. Say: "plus side minus minus side equals the source value" and have her point at the + on the diagram.</li>
+<li>Treating a grounded source as a supernode. Ask, before every voltage source: "Is one end on ground?" If yes → known node, no bubble.</li>
+<li>Panicking at a negative node voltage. It just means below the reference floor.</li>
+</ul></div>
+</section>
+<section class="block" id="b4">
+<div class="blockhead"><span class="eyebrow">Block 4 · 2:50–3:30</span><h2>Dependent sources</h2></div>
+<p class="goal"><b>Goal:</b> handle the diamond. Every quiz nodal question has one. The method does not change — there is exactly one extra line to write.</p>
+
+<div class="rule"><h4>Rule 4 — a dependent source is an ordinary source plus one translation line</h4>
+<ol>
+  <li>Write the KCL (or supernode KCL + KVL) <em>exactly as if the source were independent</em>, using its label (e.g. 2<span class="eq"><i>i</i><sub>x</sub></span>) as if it were a number.</li>
+  <li>Write <b>one extra line</b> that expresses the controlling variable in node voltages: a controlling <em>current</em> through a resistor is Rule 1, <span class="eq"><i>i</i><sub>x</sub> = (<i>v</i><sub>tail</sub> − <i>v</i><sub>head</sub>)/<i>R</i></span>; a controlling <em>voltage</em> is a difference of node voltages, <span class="eq"><i>v</i><sub>x</sub> = <i>v</i><sub>+</sub> − <i>v</i><sub>−</sub></span>.</li>
+  <li>Substitute, collect, solve. Same number of equations as before.</li>
+</ol>
+<p>The slides (57–60) do precisely this: "write KCL including the current of the controlled source just as if it were an ordinary current source; next find an expression for the controlling variable in terms of the node voltages; substitute."</p></div>
+
+<div class="worked" data-worked>
+<header><h3>Worked example D — current-controlled current source</h3><span class="src">slides 57–60 with numbers</span></header>
+<div class="body">
+<figure><svg id="figD1" class="circ" viewBox="-80 -55 405 280" width="405" height="280" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="wire" data-nodes="v1" ><path d="M 0.0 60.0 L 0.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el src" data-nodes="v3 v1" ><path d="M 240.0 0.0 L 135.0 0.0 M 105.0 0.0 L 0.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><polygon points="105.0,0.0 120.0,-15.0 135.0,0.0 120.0,15.0" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="129.0" y1="0.0" x2="111.0" y2="0.0" stroke="currentColor" stroke-width="2"/><polygon points="108.0,0.0 115.0,-3.9 115.0,3.9" fill="currentColor" stroke="none"/><text x="120.0" y="-28.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="var(--accent, #c2410c)" class="lbl">2ix</text></g>
+<g class="wire" data-nodes="v3" ><path d="M 240.0 0.0 L 240.0 60.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el src" data-nodes="v1 0" ><path d="M 0.0 180.0 L 0.0 135.0 M 0.0 105.0 L 0.0 60.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="0.0" cy="120.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="0.0" y1="129.0" x2="0.0" y2="111.0" stroke="currentColor" stroke-width="2"/><polygon points="0.0,108.0 3.9,115.0 -3.9,115.0" fill="currentColor" stroke="none"/><text x="-26.0" y="120.0" text-anchor="end" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">2 A</text></g>
+<g class="el" data-nodes="v1 v2" ><path d="M 0.0 60.0 L 38.0 60.0 L 41.7 67.0 L 49.0 53.0 L 56.3 67.0 L 63.7 53.0 L 71.0 67.0 L 78.3 53.0 L 82.0 60.0 L 120.0 60.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="60.0" y="40.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">4 Ω</text></g>
+<g class="el" data-nodes="v2 v3" ><path d="M 120.0 60.0 L 158.0 60.0 L 161.7 67.0 L 169.0 53.0 L 176.3 67.0 L 183.7 53.0 L 191.0 67.0 L 198.3 53.0 L 202.0 60.0 L 240.0 60.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="180.0" y="40.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">2 Ω</text></g>
+<g class="ann" data-nodes="" ><line x1="194.0" y1="82.0" x2="166.0" y2="82.0" stroke="var(--accent, #c2410c)" stroke-width="2"/><polygon points="163.0,82.0 170.0,78.2 170.0,85.8" fill="var(--accent, #c2410c)" stroke="none"/><text x="180.0" y="76.0" text-anchor="middle" dominant-baseline="auto" font-size="14" fill="var(--accent, #c2410c)" class="ann">ix</text></g>
+<g class="el" data-nodes="v2 0" ><path d="M 120.0 60.0 L 120.0 98.0 L 113.0 101.7 L 127.0 109.0 L 113.0 116.3 L 127.0 123.7 L 113.0 131.0 L 127.0 138.3 L 120.0 142.0 L 120.0 180.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="140.0" y="120.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">4 Ω</text></g>
+<g class="el" data-nodes="v3 0" ><path d="M 240.0 60.0 L 240.0 98.0 L 233.0 101.7 L 247.0 109.0 L 233.0 116.3 L 247.0 123.7 L 233.0 131.0 L 247.0 138.3 L 240.0 142.0 L 240.0 180.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="260.0" y="120.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">8 Ω</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 180.0 L 240.0 180.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 60 180 L 60 192 M 48 192 L 72 192 M 52 197 L 68 197 M 56 202 L 64 202" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="v1" data-node="v1"><circle cx="0" cy="60" r="4" fill="currentColor"/><text x="-12.0" y="60.0" text-anchor="end" dominant-baseline="central" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v1</text></g>
+<g class="nd" data-nodes="v2" data-node="v2"><circle cx="120" cy="60" r="4" fill="currentColor"/><text x="112.0" y="48.0" text-anchor="end" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v2</text></g>
+<g class="nd" data-nodes="v3" data-node="v3"><circle cx="240" cy="60" r="4" fill="currentColor"/><text x="252.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v3</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="120" cy="180" r="4" fill="currentColor"/></g></svg></figure>
+<ol class="steps">
+  <li><h4>Read the dependent source</h4><p>The diamond on top pushes a current of 2<span class="eq"><i>i</i><sub>x</sub></span> from <span class="eq"><i>v</i><sub>3</sub></span> toward <span class="eq"><i>v</i><sub>1</sub></span> (arrow points left). <span class="eq"><i>i</i><sub>x</sub></span> is defined on the 2 Ω resistor, arrow pointing from <span class="eq"><i>v</i><sub>3</sub></span> to <span class="eq"><i>v</i><sub>2</sub></span>. Three unknown nodes.</p></li>
+  <li><h4>KCL at each node, treating 2<i>i</i><sub>x</sub> as a number</h4>
+  <div class="eqblock">
+  <div><span class="lab">node 1</span> (<i>v</i><sub>1</sub> − <i>v</i><sub>2</sub>)/4 − 2 − 2<i>i</i><sub>x</sub> = 0 &nbsp;<span class="num">both sources point INTO v1</span></div>
+  <div><span class="lab">node 2</span> (<i>v</i><sub>2</sub> − <i>v</i><sub>1</sub>)/4 + <i>v</i><sub>2</sub>/4 + (<i>v</i><sub>2</sub> − <i>v</i><sub>3</sub>)/2 = 0</div>
+  <div><span class="lab">node 3</span> (<i>v</i><sub>3</sub> − <i>v</i><sub>2</sub>)/2 + <i>v</i><sub>3</sub>/8 + 2<i>i</i><sub>x</sub> = 0 &nbsp;<span class="num">2ix leaves v3</span></div>
+  </div></li>
+  <li><h4>The translation line</h4><div class="eqblock"><div><span class="lab">Rule 1</span> <i>i</i><sub>x</sub> = (<i>v</i><sub>3</sub> − <i>v</i><sub>2</sub>)/2 &nbsp;<span class="num">tail v3, head v2</span></div></div></li>
+  <li><h4>Substitute and clear fractions</h4>
+  <div class="eqblock">
+  <div><span class="lab">node 1 ×4</span> <i>v</i><sub>1</sub> − <i>v</i><sub>2</sub> − 8 − 4(<i>v</i><sub>3</sub> − <i>v</i><sub>2</sub>) = 0 &nbsp;→&nbsp; <i>v</i><sub>1</sub> + 3<i>v</i><sub>2</sub> − 4<i>v</i><sub>3</sub> = 8</div>
+  <div><span class="lab">node 2 ×4</span> −<i>v</i><sub>1</sub> + 4<i>v</i><sub>2</sub> − 2<i>v</i><sub>3</sub> = 0</div>
+  <div><span class="lab">node 3 ×8</span> 4<i>v</i><sub>3</sub> − 4<i>v</i><sub>2</sub> + <i>v</i><sub>3</sub> + 8(<i>v</i><sub>3</sub> − <i>v</i><sub>2</sub>) = 0 &nbsp;→&nbsp; −12<i>v</i><sub>2</sub> + 13<i>v</i><sub>3</sub> = 0</div>
+  </div>
+  <p>Notice the "healthy pattern" from Block 2 is now broken (node 1 has +3<span class="eq"><i>v</i><sub>2</sub></span>). That's expected with dependent sources — they're the one thing that legitimately breaks the pattern.</p></li>
+  <li><h4>Solve and answer</h4>
+  <div class="eqblock"><div>from node 3: <i>v</i><sub>3</sub> = (12/13)<i>v</i><sub>2</sub>. Substitute into the other two and solve the 2×2:</div>
+  <div><span class="res"><i>v</i><sub>1</sub> = 11.79 V, &nbsp;<i>v</i><sub>2</sub> = 5.474 V, &nbsp;<i>v</i><sub>3</sub> = 5.053 V</span>, &nbsp; <i>i</i><sub>x</sub> = (5.053 − 5.474)/2 = <span class="res">−0.211 A</span></div>
+  <div><span class="lab">check node 2</span> (5.474 − 11.79)/4 + 5.474/4 + (5.474 − 5.053)/2 = −1.579 + 1.368 + 0.211 = 0 ✓</div></div></li>
+</ol>
+<div class="stepctl"><button class="btn primary" data-next>Reveal next step</button><button class="btn" data-all>Show all</button><span class="cnt"></span></div>
+</div></div>
+
+<div class="worked" data-worked>
+<header><h3>Worked example E — dependent <em>voltage</em> source ⇒ supernode</h3><span class="src">DC Part II · slide 68, example 10 · find <i>i</i><sub>y</sub></span></header>
+<div class="body">
+<figure><svg id="figS10" class="circ" viewBox="-80 -55 405 280" width="405" height="280" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="wire" data-nodes="v1" ><path d="M 0.0 60.0 L 0.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="v1 v3" ><path d="M 0.0 0.0 L 98.0 0.0 L 101.7 7.0 L 109.0 -7.0 L 116.3 7.0 L 123.7 -7.0 L 131.0 7.0 L 138.3 -7.0 L 142.0 0.0 L 240.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="120.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">5 Ω</text></g>
+<g class="wire" data-nodes="v3" ><path d="M 240.0 0.0 L 240.0 60.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="ann" data-nodes="" ><line x1="106.0" y1="22.0" x2="134.0" y2="22.0" stroke="var(--accent, #c2410c)" stroke-width="2"/><polygon points="137.0,22.0 130.0,25.9 130.0,18.1" fill="var(--accent, #c2410c)" stroke="none"/><text x="120.0" y="28.0" text-anchor="middle" dominant-baseline="hanging" font-size="14" fill="var(--accent, #c2410c)" class="ann">iy</text></g>
+<g class="el src" data-nodes="v1 0" ><path d="M 0.0 180.0 L 0.0 135.0 M 0.0 105.0 L 0.0 60.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="0.0" cy="120.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="0.0" y1="129.0" x2="0.0" y2="111.0" stroke="currentColor" stroke-width="2"/><polygon points="0.0,108.0 3.9,115.0 -3.9,115.0" fill="currentColor" stroke="none"/><text x="-26.0" y="120.0" text-anchor="end" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">3 A</text></g>
+<g class="el" data-nodes="v1 v2" ><path d="M 0.0 60.0 L 38.0 60.0 L 41.7 67.0 L 49.0 53.0 L 56.3 67.0 L 63.7 53.0 L 71.0 67.0 L 78.3 53.0 L 82.0 60.0 L 120.0 60.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="60.0" y="40.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">10 Ω</text></g>
+<g class="el src" data-nodes="v2 v3" ><path d="M 120.0 60.0 L 165.0 60.0 M 195.0 60.0 L 240.0 60.0" stroke="currentColor" stroke-width="2" fill="none"/><polygon points="195.0,60.0 180.0,75.0 165.0,60.0 180.0,45.0" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><text x="173.5" y="60.0" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="186.5" y="60.0" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">−</text><text x="180.0" y="32.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="var(--accent, #c2410c)" class="lbl">2iy</text></g>
+<g class="el" data-nodes="v2 0" ><path d="M 120.0 60.0 L 120.0 98.0 L 113.0 101.7 L 127.0 109.0 L 113.0 116.3 L 127.0 123.7 L 113.0 131.0 L 127.0 138.3 L 120.0 142.0 L 120.0 180.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="140.0" y="120.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">2 Ω</text></g>
+<g class="el" data-nodes="v3 0" ><path d="M 240.0 60.0 L 240.0 98.0 L 233.0 101.7 L 247.0 109.0 L 233.0 116.3 L 247.0 123.7 L 233.0 131.0 L 247.0 138.3 L 240.0 142.0 L 240.0 180.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="260.0" y="120.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">5 Ω</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 180.0 L 240.0 180.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 60 180 L 60 192 M 48 192 L 72 192 M 52 197 L 68 197 M 56 202 L 64 202" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="v1" data-node="v1"><circle cx="0" cy="60" r="4" fill="currentColor"/><text x="-12.0" y="60.0" text-anchor="end" dominant-baseline="central" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v1</text></g>
+<g class="nd" data-nodes="v2" data-node="v2"><circle cx="120" cy="60" r="4" fill="currentColor"/><text x="112.0" y="72.0" text-anchor="end" dominant-baseline="hanging" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v2</text></g>
+<g class="nd" data-nodes="v3" data-node="v3"><circle cx="240" cy="60" r="4" fill="currentColor"/><text x="252.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v3</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="120" cy="180" r="4" fill="currentColor"/></g></svg></figure>
+<ol class="steps">
+  <li><h4>Spot the case</h4><p>The diamond is a <em>voltage</em> source (it has + and −) sitting between <span class="eq"><i>v</i><sub>2</sub></span> and <span class="eq"><i>v</i><sub>3</sub></span>, neither of which is ground. Floating voltage source → supernode {2, 3}, Rule 3. It's dependent → Rule 4 adds one translation line. Unknowns: <span class="eq"><i>v</i><sub>1</sub>, <i>v</i><sub>2</sub>, <i>v</i><sub>3</sub></span>.</p></li>
+  <li><h4>KCL at node 1 and for the bubble</h4>
+  <div class="eqblock">
+  <div><span class="lab">node 1</span> (<i>v</i><sub>1</sub> − <i>v</i><sub>2</sub>)/10 + (<i>v</i><sub>1</sub> − <i>v</i><sub>3</sub>)/5 − 3 = 0</div>
+  <div><span class="lab">supernode</span> (<i>v</i><sub>2</sub> − <i>v</i><sub>1</sub>)/10 + <i>v</i><sub>2</sub>/2 + (<i>v</i><sub>3</sub> − <i>v</i><sub>1</sub>)/5 + <i>v</i><sub>3</sub>/5 = 0</div>
+  </div>
+  <p>Bubble terms: everything hanging off <span class="eq"><i>v</i><sub>2</sub></span> (10 Ω to <span class="eq"><i>v</i><sub>1</sub></span>, 2 Ω to ground) and off <span class="eq"><i>v</i><sub>3</sub></span> (5 Ω on top to <span class="eq"><i>v</i><sub>1</sub></span>, 5 Ω to ground). The diamond itself is skipped.</p></li>
+  <li><h4>KVL inside the bubble + translation</h4>
+  <div class="eqblock">
+  <div><span class="lab">constraint</span> <i>v</i><sub>2</sub> − <i>v</i><sub>3</sub> = 2<i>i</i><sub>y</sub> &nbsp;<span class="num">+ is on the v2 side</span></div>
+  <div><span class="lab">Rule 1</span> <i>i</i><sub>y</sub> = (<i>v</i><sub>1</sub> − <i>v</i><sub>3</sub>)/5 &nbsp;<span class="num">arrow on the top 5 Ω, v1 → v3</span></div>
+  <div>→ <i>v</i><sub>2</sub> − <i>v</i><sub>3</sub> = 0.4(<i>v</i><sub>1</sub> − <i>v</i><sub>3</sub>) &nbsp;→&nbsp; −2<i>v</i><sub>1</sub> + 5<i>v</i><sub>2</sub> − 3<i>v</i><sub>3</sub> = 0</div>
+  </div></li>
+  <li><h4>Standard form &amp; solve</h4>
+  <div class="eqblock">
+  <div>3<i>v</i><sub>1</sub> − <i>v</i><sub>2</sub> − 2<i>v</i><sub>3</sub> = 30; &nbsp; −3<i>v</i><sub>1</sub> + 6<i>v</i><sub>2</sub> + 4<i>v</i><sub>3</sub> = 0; &nbsp; −2<i>v</i><sub>1</sub> + 5<i>v</i><sub>2</sub> − 3<i>v</i><sub>3</sub> = 0</div>
+  <div><span class="res"><i>v</i><sub>1</sub> = 12.53 V, &nbsp;<i>v</i><sub>2</sub> = 5.604 V, &nbsp;<i>v</i><sub>3</sub> = 0.989 V</span></div>
+  <div><i>i</i><sub>y</sub> = (12.53 − 0.989)/5 = <span class="res">2.31 A</span> &nbsp;<span class="num">slide answer: 2.31 A ✓</span></div>
+  </div></li>
+  <li><h4>Check</h4><p>Constraint: <span class="eq"><i>v</i><sub>2</sub> − <i>v</i><sub>3</sub></span> = 5.604 − 0.989 = 4.615, and 2<span class="eq"><i>i</i><sub>y</sub></span> = 4.615 ✓. Node 1: (12.53 − 5.604)/10 + (12.53 − 0.989)/5 = 0.692 + 2.308 = 3.0 A ✓.</p></li>
+</ol>
+<div class="stepctl"><button class="btn primary" data-next>Reveal next step</button><button class="btn" data-all>Show all</button><span class="cnt"></span></div>
+</div></div>
+
+<div class="turn"><h3><span class="tag">Your turn</span> Old-quiz shape — find <i>v</i><sub>ab</sub> and <i>i</i><sub>x</sub></h3>
+<figure><svg id="figQ4" class="circ" viewBox="-80 -55 465 220" width="465" height="220" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="el src" data-nodes="v2 0" ><path d="M 0.0 120.0 L 0.0 75.0 M 0.0 45.0 L 0.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="0.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="0.0" y1="69.0" x2="0.0" y2="51.0" stroke="currentColor" stroke-width="2"/><polygon points="0.0,48.0 3.9,55.0 -3.9,55.0" fill="currentColor" stroke="none"/><text x="-26.0" y="60.0" text-anchor="end" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">2 A</text></g>
+<g class="wire" data-nodes="v2" ><path d="M 0.0 0.0 L 60.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="v2 0" ><path d="M 60.0 0.0 L 60.0 38.0 L 53.0 41.7 L 67.0 49.0 L 53.0 56.3 L 67.0 63.7 L 53.0 71.0 L 67.0 78.3 L 60.0 82.0 L 60.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="80.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">30 Ω</text></g>
+<g class="el src" data-nodes="v2 v1" ><path d="M 60.0 0.0 L 105.0 0.0 M 135.0 0.0 L 180.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><polygon points="135.0,0.0 120.0,15.0 105.0,0.0 120.0,-15.0" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><text x="126.5" y="0.0" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="113.5" y="0.0" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">−</text><text x="120.0" y="-28.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="var(--accent, #c2410c)" class="lbl">25ix</text></g>
+<g class="el" data-nodes="v1 0" ><path d="M 180.0 0.0 L 180.0 38.0 L 173.0 41.7 L 187.0 49.0 L 173.0 56.3 L 187.0 63.7 L 173.0 71.0 L 187.0 78.3 L 180.0 82.0 L 180.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="200.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">20 Ω</text></g>
+<g class="ann" data-nodes="" ><line x1="162.0" y1="46.0" x2="162.0" y2="74.0" stroke="var(--accent, #c2410c)" stroke-width="2"/><polygon points="162.0,77.0 158.2,70.0 165.8,70.0" fill="var(--accent, #c2410c)" stroke="none"/><text x="152.0" y="60.0" text-anchor="end" dominant-baseline="central" font-size="14" fill="var(--accent, #c2410c)" class="ann">ix</text></g>
+<g class="wire" data-nodes="v1" ><path d="M 180.0 0.0 L 270.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="wire" data-nodes="0" ><path d="M 180.0 120.0 L 270.0 120.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="nd" data-nodes="a" data-node="a"><circle cx="270.0" cy="0" r="4" fill="currentColor"/><text x="282.0" y="0.0" text-anchor="start" dominant-baseline="central" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">a</text></g>
+<g class="nd" data-nodes="b" data-node="b"><circle cx="270.0" cy="120" r="4" fill="currentColor"/><text x="282.0" y="120.0" text-anchor="start" dominant-baseline="central" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">b</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 120.0 L 180.0 120.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 120 120 L 120 132 M 108 132 L 132 132 M 112 137 L 128 137 M 116 142 L 124 142" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="v2" data-node="v2"><circle cx="60" cy="0" r="4" fill="currentColor"/><text x="52.0" y="-12.0" text-anchor="end" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v2</text></g>
+<g class="nd" data-nodes="v1" data-node="v1"><circle cx="180" cy="0" r="4" fill="currentColor"/><text x="188.0" y="-12.0" text-anchor="start" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v1</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="60" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="180" cy="120" r="4" fill="currentColor"/></g></svg></figure>
+<p>This is the circuit from question 4 of the old quiz (the nodal half of a Thévenin problem; on Day 2 you'll finish it with mesh). Terminals a–b are open, so nothing flows out to the right. Find <span class="eq"><i>v</i><sub>ab</sub> = <i>v</i><sub>1</sub></span>. Expected: 48 V. Plan before writing: Which case is the diamond? What is the translation line?</p>
+<details class="rv"><summary>Check the plan &amp; equations</summary><div class="in">
+<p>Dependent <em>voltage</em> source between <span class="eq"><i>v</i><sub>2</sub></span> and <span class="eq"><i>v</i><sub>1</sub></span>, neither grounded → supernode {1, 2}. Translation: <span class="eq"><i>i</i><sub>x</sub> = <i>v</i><sub>1</sub>/20</span> (down through the 20 Ω to ground).</p>
+<div class="eqblock">
+<div><span class="lab">supernode</span> <i>v</i><sub>2</sub>/30 + <i>v</i><sub>1</sub>/20 − 2 = 0</div>
+<div><span class="lab">constraint</span> <i>v</i><sub>1</sub> − <i>v</i><sub>2</sub> = 25<i>i</i><sub>x</sub> = 25·<i>v</i><sub>1</sub>/20 = 1.25<i>v</i><sub>1</sub> &nbsp;→&nbsp; <i>v</i><sub>2</sub> = −0.25<i>v</i><sub>1</sub></div>
+</div></div></details>
+<details class="rv"><summary>Check the answer</summary><div class="in">
+<div class="eqblock"><div>−0.25<i>v</i><sub>1</sub>/30 + <i>v</i><sub>1</sub>/20 = 2 &nbsp;→&nbsp; <i>v</i><sub>1</sub>(−1/120 + 6/120) = 2 &nbsp;→&nbsp; <span class="res"><i>v</i><sub>1</sub> = 48 V</span>, &nbsp;<i>v</i><sub>2</sub> = −12 V, &nbsp;<span class="res"><i>i</i><sub>x</sub> = 2.4 A</span></div>
+<div><span class="lab">check</span> −12/30 + 48/20 = −0.4 + 2.4 = 2 A ✓; &nbsp; <i>v</i><sub>1</sub> − <i>v</i><sub>2</sub> = 60 = 25 × 2.4 ✓</div></div>
+<p>Same numbers as the marked quiz paper (<span class="eq"><i>v</i><sub>1</sub></span> = 48, <span class="eq"><i>v</i><sub>2</sub></span> = −12). The <em>whole</em> nodal part of a 10-point question is these two lines plus arithmetic.</p></div></details>
+</div>
+
+<div class="tutor"><span class="eyebrow">Tutor · the dependent-source ritual</span>
+<p>Make her do the same three things aloud every time she sees a diamond: (1) "current or voltage source?" (2) "grounded, floating, or between nodes?" → decides Rule 2 vs Rule 3, (3) "what controls it, and where is that thing on the diagram?" → the translation line. If she can narrate those three in under 30 seconds, she's ready for the quiz.</p></div>
+</section>
+<section class="block" id="b5">
+<div class="blockhead"><span class="eyebrow">Block 5 · 3:30–3:55</span><h2>Quiz technique &amp; timed drill</h2></div>
+<p class="goal"><b>Goal:</b> get the power question right (where marks were lost on the last quiz), know exactly what to write on the page, and do one full problem against the clock.</p>
+
+<h3>5.1 Power of a source — the sign is the whole question</h3>
+<p>After nodal analysis you know every node voltage, so you know the voltage across every source. The quiz then asks "the power of the independent source". Two clean rules, both from the passive sign convention:</p>
+<div class="rule"><h4>Rule 5 — power delivered by a source</h4>
+<div class="eqblock">
+<div><span class="lab">current source</span> <i>p</i><sub>delivered</sub> = <i>I</i> × (<i>v</i><sub>head</sub> − <i>v</i><sub>tail</sub>) &nbsp;<span class="num">voltage at the arrowhead minus voltage at the tail</span></div>
+<div><span class="lab">voltage source</span> <i>p</i><sub>delivered</sub> = <i>V</i> × (current flowing <em>out of</em> the + terminal)</div>
+</div>
+<p>Positive → the source is delivering (generating) power. Negative → it is absorbing power, which is allowed and happens on quizzes whenever a dependent source is doing the pushing. If the question says "power absorbed", flip the sign. Always state which one you're giving: "the 2 A source <em>absorbs</em> 24 W".</p></div>
+
+<p>Two examples you already have the numbers for:</p>
+<ul>
+  <li><b>Your-turn circuit in Block 4</b> (2 A source, arrow up into <span class="eq"><i>v</i><sub>2</sub></span> = −12 V): <span class="eq"><i>p</i><sub>del</sub></span> = 2 × (−12 − 0) = <b>−24 W</b>. The 2 A source <em>absorbs</em> 24 W — the dependent source is supplying the circuit. Energy check: resistors absorb 12²/30 + 48²/20 = 4.8 + 115.2 = 120 W; dependent source delivers 60 V × 2.4 A = 144 W = 120 + 24 ✓.</li>
+  <li><b>Worked example B</b> (12 V source, 0.667 A leaves its + terminal): <span class="eq"><i>p</i><sub>del</sub></span> = 12 × 0.667 = <b>8 W</b> delivered.</li>
+</ul>
+<div class="callout warn"><span class="eyebrow">From the marked quiz</span>
+<p>On question 2 of the old quiz the student computed the 1 A source's voltage with the wrong polarity, wrote "generates 22 W" and lost the mark with the note <em>"where is it? direction!"</em>. The fix is mechanical: write the node voltages at the arrowhead and at the tail <em>on the diagram</em>, then apply Rule 5. Never guess the sign from intuition.</p></div>
+
+<h3>5.2 What a full-mark answer looks like</h3>
+<ol>
+  <li><b>On the diagram:</b> mark ground, label every unknown node, draw the supernode bubble if any, and mark any current you define with an arrow.</li>
+  <li><b>Equations, labelled:</b> "KCL at <span class="eq"><i>v</i><sub>1</sub></span>: …", "Supernode: …", "Constraint: …", "<span class="eq"><i>i</i><sub>x</sub></span> = …". The marker gives method marks for these even if the arithmetic slips.</li>
+  <li><b>Standard form</b> with the fractions cleared, then the solution as <b>decimals</b> (quiz rule). Keep 3–4 significant figures until the end.</li>
+  <li><b>The thing that was asked</b>, in a box, with units and — for power — the word "delivers" or "absorbs".</li>
+  <li><b>One-line check:</b> plug into one KCL. Write it down; it's evidence you know what you're doing, and it catches most errors.</li>
+</ol>
+
+<h3>5.3 The mistakes that cost marks</h3>
+<ul class="mistakes">
+  <li><span class="x">×</span><div><b>Counting dots as nodes.</b><p>A node is everything joined by wire. Trace it. (Block 0)</p></div></li>
+  <li><span class="x">×</span><div><b>"Them minus me".</b><p>Every resistor term is (this node − neighbour)/R. Say it out loud. (Rule 2)</p></div></li>
+  <li><span class="x">×</span><div><b>Sign of a current source.</b><p>Arrow into the node → −I in the "leaving = 0" form. Arrow out → +I.</p></div></li>
+  <li><span class="x">×</span><div><b>Writing a current for a voltage source.</b><p>You don't know it. Grounded → known node. Floating → supernode + constraint. (Rule 3)</p></div></li>
+  <li><span class="x">×</span><div><b>Forgetting the translation line.</b><p>A dependent source always needs <span class="eq"><i>i</i><sub>x</sub></span> or <span class="eq"><i>v</i><sub>x</sub></span> written in node voltages. (Rule 4)</p></div></li>
+  <li><span class="x">×</span><div><b>Assuming the voltage across a current source is zero.</b><p>It's whatever the nodes say it is. The slides explicitly warn about this.</p></div></li>
+  <li><span class="x">×</span><div><b>Power sign by feel.</b><p>Use Rule 5 with the node voltages at the arrowhead/tail (or the current out of +).</p></div></li>
+  <li><span class="x">×</span><div><b>Rounding too early / leaving fractions.</b><p>Keep 4 s.f. through the algebra, write decimals at the end.</p></div></li>
+</ul>
+
+<div class="turn"><h3><span class="tag">Timed drill · 15 min</span> Quiz-style question</h3>
+<figure><svg id="figP6" class="circ" viewBox="-80 -55 465 220" width="465" height="220" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="el src" data-nodes="v1 0" ><path d="M 0.0 120.0 L 0.0 75.0 M 0.0 45.0 L 0.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="0.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="0.0" y1="69.0" x2="0.0" y2="51.0" stroke="currentColor" stroke-width="2"/><polygon points="0.0,48.0 3.9,55.0 -3.9,55.0" fill="currentColor" stroke="none"/><text x="-26.0" y="60.0" text-anchor="end" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">3 A</text></g>
+<g class="wire" data-nodes="v1" ><path d="M 0.0 0.0 L 60.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="v1 0" ><path d="M 60.0 0.0 L 60.0 38.0 L 53.0 41.7 L 67.0 49.0 L 53.0 56.3 L 67.0 63.7 L 53.0 71.0 L 67.0 78.3 L 60.0 82.0 L 60.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="80.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">6 Ω</text></g>
+<g class="el src" data-nodes="v1 v2" ><path d="M 60.0 0.0 L 105.0 0.0 M 135.0 0.0 L 180.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><polygon points="135.0,0.0 120.0,15.0 105.0,0.0 120.0,-15.0" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><text x="126.5" y="0.0" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="113.5" y="0.0" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">−</text><text x="120.0" y="-28.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="var(--accent, #c2410c)" class="lbl">2ix</text></g>
+<g class="el" data-nodes="v2 0" ><path d="M 180.0 0.0 L 180.0 38.0 L 173.0 41.7 L 187.0 49.0 L 173.0 56.3 L 187.0 63.7 L 173.0 71.0 L 187.0 78.3 L 180.0 82.0 L 180.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="200.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">4 Ω</text></g>
+<g class="ann" data-nodes="" ><line x1="162.0" y1="46.0" x2="162.0" y2="74.0" stroke="var(--accent, #c2410c)" stroke-width="2"/><polygon points="162.0,77.0 158.2,70.0 165.8,70.0" fill="var(--accent, #c2410c)" stroke="none"/><text x="152.0" y="60.0" text-anchor="end" dominant-baseline="central" font-size="14" fill="var(--accent, #c2410c)" class="ann">ix</text></g>
+<g class="wire" data-nodes="v2" ><path d="M 180.0 0.0 L 300.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="v2 0" ><path d="M 300.0 0.0 L 300.0 38.0 L 293.0 41.7 L 307.0 49.0 L 293.0 56.3 L 307.0 63.7 L 293.0 71.0 L 307.0 78.3 L 300.0 82.0 L 300.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="320.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">12 Ω</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 120.0 L 300.0 120.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 120 120 L 120 132 M 108 132 L 132 132 M 112 137 L 128 137 M 116 142 L 124 142" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="v1" data-node="v1"><circle cx="60" cy="0" r="4" fill="currentColor"/><text x="60.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v1</text></g>
+<g class="nd" data-nodes="v2" data-node="v2"><circle cx="180" cy="0" r="4" fill="currentColor"/><text x="180.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v2</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="60" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="180" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="v2" data-node="v2"><circle cx="300" cy="0" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="300" cy="120" r="4" fill="currentColor"/></g></svg></figure>
+<p class="ask">Using nodal analysis, find <span class="eq"><i>v</i><sub>1</sub></span>, <span class="eq"><i>v</i><sub>2</sub></span>, <span class="eq"><i>i</i><sub>x</sub></span>, and the power of the independent 3 A source. All answers as decimals.</p>
+<div class="tutor"><span class="eyebrow">Tutor</span><p>Set a timer for 15 minutes, no hints, no page. Mark it like the quiz: 2 marks diagram labelling, 4 marks equations (supernode, constraint, translation), 2 marks solution, 2 marks power with the right sign and word. Then debrief with the reveal below. If she finishes under 10 minutes with the check written, she's at quiz level for nodal.</p></div>
+<details class="rv"><summary>Solution</summary><div class="in">
+<p>Diamond = voltage source between <span class="eq"><i>v</i><sub>1</sub></span> and <span class="eq"><i>v</i><sub>2</sub></span>, floating → supernode. Translation: <span class="eq"><i>i</i><sub>x</sub> = <i>v</i><sub>2</sub>/4</span>.</p>
+<div class="eqblock">
+<div><span class="lab">supernode</span> <i>v</i><sub>1</sub>/6 + <i>v</i><sub>2</sub>/4 + <i>v</i><sub>2</sub>/12 − 3 = 0</div>
+<div><span class="lab">constraint</span> <i>v</i><sub>2</sub> − <i>v</i><sub>1</sub> = 2<i>i</i><sub>x</sub> = 2·<i>v</i><sub>2</sub>/4 = 0.5<i>v</i><sub>2</sub> &nbsp;→&nbsp; <i>v</i><sub>1</sub> = 0.5<i>v</i><sub>2</sub></div>
+<div>0.5<i>v</i><sub>2</sub>/6 + <i>v</i><sub>2</sub>/4 + <i>v</i><sub>2</sub>/12 = 3 &nbsp;→&nbsp; <i>v</i><sub>2</sub>(1/12 + 3/12 + 1/12) = 3 &nbsp;→&nbsp; <span class="res"><i>v</i><sub>2</sub> = 7.2 V, <i>v</i><sub>1</sub> = 3.6 V, <i>i</i><sub>x</sub> = 1.8 A</span></div>
+<div><span class="lab">power</span> 3 A source, arrowhead at <i>v</i><sub>1</sub> = 3.6 V, tail at 0: <i>p</i><sub>del</sub> = 3 × (3.6 − 0) = <span class="res">10.8 W delivered</span></div>
+<div><span class="lab">check</span> 3.6/6 + 7.2/4 + 7.2/12 = 0.6 + 1.8 + 0.6 = 3 A ✓</div>
+</div></div></details>
+</div>
+</section>
+<section class="block practice" id="hw">
+<div class="blockhead"><span class="eyebrow">Homework · before Day 2</span><h2>Practice set with answers</h2></div>
+<p class="goal">Eight problems in rising difficulty. Do them <b>on paper, without the page open</b>, then check. Rule for checking: if the equations match but a number doesn't, redo only the arithmetic; if an equation differs, go back to the block named in the level tag. Problems 1–4 should take ≈ 5 min each, 5–7 ≈ 10 min, 8 is a challenge.</p>
+<div class="tutor"><span class="eyebrow">Tutor</span><p>Ask her to photograph her paper solutions and send them to you before Day 2 — you want to see her <em>equations</em>, not just answers. Problems 5 and 7 are quiz-level; if those are clean, Day 2 (mesh) can start straight from KVL.</p></div>
+
+<article class="prob"><header><span class="no">1</span><h3>Single node, two sources</h3><span class="lvl">Block 1</span></header><div class="body">
+<figure><svg id="figP1" class="circ" viewBox="-80 -55 525 220" width="525" height="220" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="el src" data-nodes="v 0" ><path d="M 0.0 120.0 L 0.0 75.0 M 0.0 45.0 L 0.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="0.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="0.0" y1="69.0" x2="0.0" y2="51.0" stroke="currentColor" stroke-width="2"/><polygon points="0.0,48.0 3.9,55.0 -3.9,55.0" fill="currentColor" stroke="none"/><text x="26.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">4 A</text></g>
+<g class="wire" data-nodes="v" ><path d="M 0.0 0.0 L 360.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="v 0" ><path d="M 120.0 0.0 L 120.0 38.0 L 113.0 41.7 L 127.0 49.0 L 113.0 56.3 L 127.0 63.7 L 113.0 71.0 L 127.0 78.3 L 120.0 82.0 L 120.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="140.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">6 Ω</text></g>
+<g class="el" data-nodes="v 0" ><path d="M 240.0 0.0 L 240.0 38.0 L 233.0 41.7 L 247.0 49.0 L 233.0 56.3 L 247.0 63.7 L 233.0 71.0 L 247.0 78.3 L 240.0 82.0 L 240.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="260.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">3 Ω</text></g>
+<g class="el src" data-nodes="v 0" ><path d="M 360.0 0.0 L 360.0 45.0 M 360.0 75.0 L 360.0 120.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="360.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="360.0" y1="51.0" x2="360.0" y2="69.0" stroke="currentColor" stroke-width="2"/><polygon points="360.0,72.0 356.1,65.0 363.9,65.0" fill="currentColor" stroke="none"/><text x="386.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">1 A</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 120.0 L 360.0 120.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 180 120 L 180 132 M 168 132 L 192 132 M 172 137 L 188 137 M 176 142 L 184 142" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="v" data-node="v"><circle cx="120" cy="0" r="4" fill="currentColor"/><text x="112.0" y="-12.0" text-anchor="end" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v</text></g>
+<g class="nd" data-nodes="v" data-node="v"><circle cx="240" cy="0" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="120" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="240" cy="120" r="4" fill="currentColor"/></g></svg></figure>
+<p class="ask">Find <span class="eq"><i>v</i></span> and the current in each resistor.</p>
+<details class="rv"><summary>Equation</summary><div class="in"><div class="eqblock"><div><i>v</i>/6 + <i>v</i>/3 − 4 + 1 = 0 &nbsp;<span class="num">4 A into the node → −4; 1 A out of the node → +1</span></div></div></div></details>
+<details class="rv"><summary>Answer</summary><div class="in"><span class="ans">v = 6 V · 1 A in the 6 Ω · 2 A in the 3 Ω</span><p>Check: 1 + 2 + 1 = 4 A leaving = 4 A entering ✓</p></div></details>
+</div></article>
+
+<article class="prob"><header><span class="no">2</span><h3>Two nodes, source power</h3><span class="lvl">Block 2 + Rule 5</span></header><div class="body">
+<figure><svg id="figP2" class="circ" viewBox="-80 -55 525 220" width="525" height="220" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="el src" data-nodes="v1 0" ><path d="M 0.0 120.0 L 0.0 75.0 M 0.0 45.0 L 0.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="0.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="0.0" y1="69.0" x2="0.0" y2="51.0" stroke="currentColor" stroke-width="2"/><polygon points="0.0,48.0 3.9,55.0 -3.9,55.0" fill="currentColor" stroke="none"/><text x="26.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">5 A</text></g>
+<g class="wire" data-nodes="v1" ><path d="M 0.0 0.0 L 120.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="v1 0" ><path d="M 120.0 0.0 L 120.0 38.0 L 113.0 41.7 L 127.0 49.0 L 113.0 56.3 L 127.0 63.7 L 113.0 71.0 L 127.0 78.3 L 120.0 82.0 L 120.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="140.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">10 Ω</text></g>
+<g class="el" data-nodes="v1 v2" ><path d="M 120.0 0.0 L 158.0 0.0 L 161.7 7.0 L 169.0 -7.0 L 176.3 7.0 L 183.7 -7.0 L 191.0 7.0 L 198.3 -7.0 L 202.0 0.0 L 240.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="180.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">5 Ω</text></g>
+<g class="el" data-nodes="v2 0" ><path d="M 240.0 0.0 L 240.0 38.0 L 233.0 41.7 L 247.0 49.0 L 233.0 56.3 L 247.0 63.7 L 233.0 71.0 L 247.0 78.3 L 240.0 82.0 L 240.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="260.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">20 Ω</text></g>
+<g class="wire" data-nodes="v2" ><path d="M 240.0 0.0 L 360.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el src" data-nodes="v2 0" ><path d="M 360.0 0.0 L 360.0 45.0 M 360.0 75.0 L 360.0 120.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="360.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="360.0" y1="51.0" x2="360.0" y2="69.0" stroke="currentColor" stroke-width="2"/><polygon points="360.0,72.0 356.1,65.0 363.9,65.0" fill="currentColor" stroke="none"/><text x="386.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">2 A</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 120.0 L 360.0 120.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 180 120 L 180 132 M 168 132 L 192 132 M 172 137 L 188 137 M 176 142 L 184 142" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="v1" data-node="v1"><circle cx="120" cy="0" r="4" fill="currentColor"/><text x="112.0" y="-12.0" text-anchor="end" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v1</text></g>
+<g class="nd" data-nodes="v2" data-node="v2"><circle cx="240" cy="0" r="4" fill="currentColor"/><text x="248.0" y="-12.0" text-anchor="start" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v2</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="120" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="240" cy="120" r="4" fill="currentColor"/></g></svg></figure>
+<p class="ask">Find <span class="eq"><i>v</i><sub>1</sub></span>, <span class="eq"><i>v</i><sub>2</sub></span>, and the power delivered by the 5 A source.</p>
+<details class="rv"><summary>Equations</summary><div class="in"><div class="eqblock">
+<div><span class="lab">node 1</span> <i>v</i><sub>1</sub>/10 + (<i>v</i><sub>1</sub> − <i>v</i><sub>2</sub>)/5 − 5 = 0 &nbsp;<span class="num">×10 → 3<i>v</i><sub>1</sub> − 2<i>v</i><sub>2</sub> = 50</span></div>
+<div><span class="lab">node 2</span> (<i>v</i><sub>2</sub> − <i>v</i><sub>1</sub>)/5 + <i>v</i><sub>2</sub>/20 + 2 = 0 &nbsp;<span class="num">×20 → −4<i>v</i><sub>1</sub> + 5<i>v</i><sub>2</sub> = −40</span></div></div></div></details>
+<details class="rv"><summary>Answer</summary><div class="in"><span class="ans">v1 = 24.29 V · v2 = 11.43 V · p = 5 × 24.29 = 121.4 W delivered</span><p>The 2 A source: arrowhead at ground (0 V), tail at <span class="eq"><i>v</i><sub>2</sub></span>: 2 × (0 − 11.43) = −22.9 W, i.e. it absorbs 22.9 W.</p></div></details>
+</div></article>
+
+<article class="prob"><header><span class="no">3</span><h3>Grounded voltage source</h3><span class="lvl">Block 3, case A</span></header><div class="body">
+<figure><svg id="figP3" class="circ" viewBox="-80 -55 525 220" width="525" height="220" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="el src" data-nodes="a 0" ><path d="M 0.0 120.0 L 0.0 75.0 M 0.0 45.0 L 0.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="0.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><text x="0.0" y="53.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="0.0" y="66.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">−</text><text x="26.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">20 V</text></g>
+<g class="el" data-nodes="a v1" ><path d="M 0.0 0.0 L 38.0 0.0 L 41.7 7.0 L 49.0 -7.0 L 56.3 7.0 L 63.7 -7.0 L 71.0 7.0 L 78.3 -7.0 L 82.0 0.0 L 120.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="60.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">4 Ω</text></g>
+<g class="el" data-nodes="v1 0" ><path d="M 120.0 0.0 L 120.0 38.0 L 113.0 41.7 L 127.0 49.0 L 113.0 56.3 L 127.0 63.7 L 113.0 71.0 L 127.0 78.3 L 120.0 82.0 L 120.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="140.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">8 Ω</text></g>
+<g class="el" data-nodes="v1 v2" ><path d="M 120.0 0.0 L 158.0 0.0 L 161.7 7.0 L 169.0 -7.0 L 176.3 7.0 L 183.7 -7.0 L 191.0 7.0 L 198.3 -7.0 L 202.0 0.0 L 240.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="180.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">2 Ω</text></g>
+<g class="el" data-nodes="v2 0" ><path d="M 240.0 0.0 L 240.0 38.0 L 233.0 41.7 L 247.0 49.0 L 233.0 56.3 L 247.0 63.7 L 233.0 71.0 L 247.0 78.3 L 240.0 82.0 L 240.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="260.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">8 Ω</text></g>
+<g class="wire" data-nodes="v2" ><path d="M 240.0 0.0 L 360.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el src" data-nodes="v2 0" ><path d="M 360.0 120.0 L 360.0 75.0 M 360.0 45.0 L 360.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="360.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="360.0" y1="69.0" x2="360.0" y2="51.0" stroke="currentColor" stroke-width="2"/><polygon points="360.0,48.0 363.9,55.0 356.1,55.0" fill="currentColor" stroke="none"/><text x="386.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">3 A</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 120.0 L 360.0 120.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 180 120 L 180 132 M 168 132 L 192 132 M 172 137 L 188 137 M 176 142 L 184 142" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="a" data-node="a"><circle cx="0" cy="0" r="4" fill="currentColor"/><text x="0.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">a</text></g>
+<g class="nd" data-nodes="v1" data-node="v1"><circle cx="120" cy="0" r="4" fill="currentColor"/><text x="120.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v1</text></g>
+<g class="nd" data-nodes="v2" data-node="v2"><circle cx="240" cy="0" r="4" fill="currentColor"/><text x="240.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v2</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="120" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="240" cy="120" r="4" fill="currentColor"/></g></svg></figure>
+<p class="ask">Find <span class="eq"><i>v</i><sub>1</sub></span>, <span class="eq"><i>v</i><sub>2</sub></span>, and the power delivered by the 20 V source.</p>
+<details class="rv"><summary>Equations</summary><div class="in"><div class="eqblock">
+<div><span class="lab">node a</span> known: <i>v</i><sub>a</sub> = 20 V</div>
+<div><span class="lab">node 1</span> (<i>v</i><sub>1</sub> − 20)/4 + <i>v</i><sub>1</sub>/8 + (<i>v</i><sub>1</sub> − <i>v</i><sub>2</sub>)/2 = 0 &nbsp;<span class="num">×8 → 7<i>v</i><sub>1</sub> − 4<i>v</i><sub>2</sub> = 40</span></div>
+<div><span class="lab">node 2</span> (<i>v</i><sub>2</sub> − <i>v</i><sub>1</sub>)/2 + <i>v</i><sub>2</sub>/8 − 3 = 0 &nbsp;<span class="num">×8 → −4<i>v</i><sub>1</sub> + 5<i>v</i><sub>2</sub> = 24</span></div></div></div></details>
+<details class="rv"><summary>Answer</summary><div class="in"><span class="ans">v1 = 15.58 V · v2 = 17.26 V · p = 20 × 1.105 = 22.1 W delivered</span><p>Current out of the + terminal = current in the 4 Ω from a to <span class="eq"><i>v</i><sub>1</sub></span> = (20 − 15.58)/4 = 1.105 A.</p></div></details>
+</div></article>
+
+<article class="prob"><header><span class="no">4</span><h3>Supernode</h3><span class="lvl">Block 3, case B</span></header><div class="body">
+<figure><svg id="figP4" class="circ" viewBox="-80 -55 585 220" width="585" height="220" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="el src" data-nodes="v1 0" ><path d="M 0.0 120.0 L 0.0 75.0 M 0.0 45.0 L 0.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="0.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="0.0" y1="69.0" x2="0.0" y2="51.0" stroke="currentColor" stroke-width="2"/><polygon points="0.0,48.0 3.9,55.0 -3.9,55.0" fill="currentColor" stroke="none"/><text x="-26.0" y="60.0" text-anchor="end" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">2 A</text></g>
+<g class="wire" data-nodes="v1" ><path d="M 0.0 0.0 L 60.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="v1 0" ><path d="M 60.0 0.0 L 60.0 38.0 L 53.0 41.7 L 67.0 49.0 L 53.0 56.3 L 67.0 63.7 L 53.0 71.0 L 67.0 78.3 L 60.0 82.0 L 60.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="80.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">4 Ω</text></g>
+<g class="el src" data-nodes="v1 v2" ><path d="M 60.0 0.0 L 105.0 0.0 M 135.0 0.0 L 180.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="120.0" cy="0.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><text x="126.5" y="0.0" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="113.5" y="0.0" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">−</text><text x="120.0" y="-26.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">6 V</text></g>
+<g class="el" data-nodes="v2 0" ><path d="M 180.0 0.0 L 180.0 38.0 L 173.0 41.7 L 187.0 49.0 L 173.0 56.3 L 187.0 63.7 L 173.0 71.0 L 187.0 78.3 L 180.0 82.0 L 180.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="200.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">4 Ω</text></g>
+<g class="el" data-nodes="v2 v3" ><path d="M 180.0 0.0 L 218.0 0.0 L 221.7 7.0 L 229.0 -7.0 L 236.3 7.0 L 243.7 -7.0 L 251.0 7.0 L 258.3 -7.0 L 262.0 0.0 L 300.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="240.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">2 Ω</text></g>
+<g class="el" data-nodes="v3 0" ><path d="M 300.0 0.0 L 300.0 38.0 L 293.0 41.7 L 307.0 49.0 L 293.0 56.3 L 307.0 63.7 L 293.0 71.0 L 307.0 78.3 L 300.0 82.0 L 300.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="320.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">2 Ω</text></g>
+<g class="wire" data-nodes="v3" ><path d="M 300.0 0.0 L 420.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el src" data-nodes="v3 0" ><path d="M 420.0 120.0 L 420.0 75.0 M 420.0 45.0 L 420.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="420.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="420.0" y1="69.0" x2="420.0" y2="51.0" stroke="currentColor" stroke-width="2"/><polygon points="420.0,48.0 423.9,55.0 416.1,55.0" fill="currentColor" stroke="none"/><text x="446.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">1 A</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 120.0 L 420.0 120.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 240 120 L 240 132 M 228 132 L 252 132 M 232 137 L 248 137 M 236 142 L 244 142" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="v1" data-node="v1"><circle cx="60" cy="0" r="4" fill="currentColor"/><text x="60.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v1</text></g>
+<g class="nd" data-nodes="v2" data-node="v2"><circle cx="180" cy="0" r="4" fill="currentColor"/><text x="180.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v2</text></g>
+<g class="nd" data-nodes="v3" data-node="v3"><circle cx="300" cy="0" r="4" fill="currentColor"/><text x="300.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v3</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="60" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="180" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="300" cy="120" r="4" fill="currentColor"/></g></svg></figure>
+<p class="ask">Find all three node voltages and the current through the 6 V source.</p>
+<details class="rv"><summary>Equations</summary><div class="in"><div class="eqblock">
+<div><span class="lab">supernode {1,2}</span> <i>v</i><sub>1</sub>/4 + <i>v</i><sub>2</sub>/4 + (<i>v</i><sub>2</sub> − <i>v</i><sub>3</sub>)/2 − 2 = 0</div>
+<div><span class="lab">node 3</span> (<i>v</i><sub>3</sub> − <i>v</i><sub>2</sub>)/2 + <i>v</i><sub>3</sub>/2 − 1 = 0</div>
+<div><span class="lab">constraint</span> <i>v</i><sub>2</sub> − <i>v</i><sub>1</sub> = 6</div></div></div></details>
+<details class="rv"><summary>Answer</summary><div class="in"><span class="ans">v1 = −0.667 V · v2 = 5.333 V · v3 = 3.667 V</span><p>Current through the source (from <span class="eq"><i>v</i><sub>1</sub></span> toward <span class="eq"><i>v</i><sub>2</sub></span>): KCL at node 1 alone: 2 A arrives, <span class="eq"><i>v</i><sub>1</sub></span>/4 = −0.167 A leaves through the 4 Ω, so 2.167 A enters the source. A negative node voltage is fine — <span class="eq"><i>v</i><sub>1</sub></span> is below ground.</p></div></details>
+</div></article>
+
+<article class="prob"><header><span class="no">5</span><h3>Voltage-controlled current source</h3><span class="lvl">Block 4 · quiz level</span></header><div class="body">
+<figure><svg id="figP5" class="circ" viewBox="-80 -55 465 220" width="465" height="220" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="el src" data-nodes="v1 0" ><path d="M 0.0 120.0 L 0.0 75.0 M 0.0 45.0 L 0.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="0.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="0.0" y1="69.0" x2="0.0" y2="51.0" stroke="currentColor" stroke-width="2"/><polygon points="0.0,48.0 3.9,55.0 -3.9,55.0" fill="currentColor" stroke="none"/><text x="-26.0" y="60.0" text-anchor="end" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">4 A</text></g>
+<g class="wire" data-nodes="v1" ><path d="M 0.0 0.0 L 60.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="v1 0" ><path d="M 60.0 0.0 L 60.0 38.0 L 53.0 41.7 L 67.0 49.0 L 53.0 56.3 L 67.0 63.7 L 53.0 71.0 L 67.0 78.3 L 60.0 82.0 L 60.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="106.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">2 Ω</text></g>
+<g class="ann" data-nodes="" ><text x="82.0" y="30.0" text-anchor="middle" dominant-baseline="central" font-size="14" fill="var(--accent, #c2410c)" class="lbl" font-weight="bold">+</text><text x="82.0" y="90.0" text-anchor="middle" dominant-baseline="central" font-size="14" fill="var(--accent, #c2410c)" class="lbl" font-weight="bold">−</text><text x="82.0" y="60.0" text-anchor="middle" dominant-baseline="central" font-size="14" fill="var(--accent, #c2410c)" class="ann">vx</text></g>
+<g class="el" data-nodes="v1 v2" ><path d="M 60.0 0.0 L 98.0 0.0 L 101.7 7.0 L 109.0 -7.0 L 116.3 7.0 L 123.7 -7.0 L 131.0 7.0 L 138.3 -7.0 L 142.0 0.0 L 180.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="120.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">4 Ω</text></g>
+<g class="el" data-nodes="v2 0" ><path d="M 180.0 0.0 L 180.0 38.0 L 173.0 41.7 L 187.0 49.0 L 173.0 56.3 L 187.0 63.7 L 173.0 71.0 L 187.0 78.3 L 180.0 82.0 L 180.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="200.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">4 Ω</text></g>
+<g class="wire" data-nodes="v2" ><path d="M 180.0 0.0 L 300.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el src" data-nodes="v2 0" ><path d="M 300.0 120.0 L 300.0 75.0 M 300.0 45.0 L 300.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><polygon points="300.0,45.0 315.0,60.0 300.0,75.0 285.0,60.0" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="300.0" y1="69.0" x2="300.0" y2="51.0" stroke="currentColor" stroke-width="2"/><polygon points="300.0,48.0 303.9,55.0 296.1,55.0" fill="currentColor" stroke="none"/><text x="328.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="var(--accent, #c2410c)" class="lbl">0.5vx</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 120.0 L 300.0 120.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 120 120 L 120 132 M 108 132 L 132 132 M 112 137 L 128 137 M 116 142 L 124 142" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="v1" data-node="v1"><circle cx="60" cy="0" r="4" fill="currentColor"/><text x="60.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v1</text></g>
+<g class="nd" data-nodes="v2" data-node="v2"><circle cx="180" cy="0" r="4" fill="currentColor"/><text x="180.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v2</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="60" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="180" cy="120" r="4" fill="currentColor"/></g></svg></figure>
+<p class="ask">Find <span class="eq"><i>v</i><sub>1</sub></span> and <span class="eq"><i>v</i><sub>2</sub></span>. (<span class="eq"><i>v</i><sub>x</sub></span> is the voltage across the 2 Ω, + on top.)</p>
+<details class="rv"><summary>Equations</summary><div class="in"><div class="eqblock">
+<div><span class="lab">translation</span> <i>v</i><sub>x</sub> = <i>v</i><sub>1</sub> − 0 = <i>v</i><sub>1</sub></div>
+<div><span class="lab">node 1</span> <i>v</i><sub>1</sub>/2 + (<i>v</i><sub>1</sub> − <i>v</i><sub>2</sub>)/4 − 4 = 0 &nbsp;<span class="num">×4 → 3<i>v</i><sub>1</sub> − <i>v</i><sub>2</sub> = 16</span></div>
+<div><span class="lab">node 2</span> (<i>v</i><sub>2</sub> − <i>v</i><sub>1</sub>)/4 + <i>v</i><sub>2</sub>/4 − 0.5<i>v</i><sub>1</sub> = 0 &nbsp;<span class="num">×4 → −3<i>v</i><sub>1</sub> + 2<i>v</i><sub>2</sub> = 0</span></div></div></div></details>
+<details class="rv"><summary>Answer</summary><div class="in"><span class="ans">v1 = 10.67 V · v2 = 16 V</span><p>Check node 2: (16 − 10.67)/4 + 16/4 = 1.333 + 4 = 5.333 A leaving; the dependent source brings in 0.5 × 10.67 = 5.333 A ✓</p></div></details>
+</div></article>
+
+<article class="prob"><header><span class="no">6</span><h3>Three unknowns, mixed sources</h3><span class="lvl">Block 3 · 3×3 solving</span></header><div class="body">
+<figure><svg id="figP7" class="circ" viewBox="-80 -55 585 220" width="585" height="220" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="el src" data-nodes="a 0" ><path d="M 0.0 120.0 L 0.0 75.0 M 0.0 45.0 L 0.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="0.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><text x="0.0" y="53.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="0.0" y="66.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">−</text><text x="26.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">24 V</text></g>
+<g class="wire" data-nodes="a" ><path d="M 0.0 0.0 L 60.0 0.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="el" data-nodes="a v1" ><path d="M 60.0 0.0 L 98.0 0.0 L 101.7 7.0 L 109.0 -7.0 L 116.3 7.0 L 123.7 -7.0 L 131.0 7.0 L 138.3 -7.0 L 142.0 0.0 L 180.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="120.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">6 Ω</text></g>
+<g class="el" data-nodes="v1 0" ><path d="M 180.0 0.0 L 180.0 38.0 L 173.0 41.7 L 187.0 49.0 L 173.0 56.3 L 187.0 63.7 L 173.0 71.0 L 187.0 78.3 L 180.0 82.0 L 180.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="200.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">6 Ω</text></g>
+<g class="el" data-nodes="v1 v2" ><path d="M 180.0 0.0 L 218.0 0.0 L 221.7 7.0 L 229.0 -7.0 L 236.3 7.0 L 243.7 -7.0 L 251.0 7.0 L 258.3 -7.0 L 262.0 0.0 L 300.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="240.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">3 Ω</text></g>
+<g class="el src" data-nodes="v2 0" ><path d="M 300.0 120.0 L 300.0 75.0 M 300.0 45.0 L 300.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="300.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="300.0" y1="69.0" x2="300.0" y2="51.0" stroke="currentColor" stroke-width="2"/><polygon points="300.0,48.0 303.9,55.0 296.1,55.0" fill="currentColor" stroke="none"/><text x="326.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">2 A</text></g>
+<g class="el" data-nodes="v2 v3" ><path d="M 300.0 0.0 L 338.0 0.0 L 341.7 7.0 L 349.0 -7.0 L 356.3 7.0 L 363.7 -7.0 L 371.0 7.0 L 378.3 -7.0 L 382.0 0.0 L 420.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="360.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">4 Ω</text></g>
+<g class="el" data-nodes="v3 0" ><path d="M 420.0 0.0 L 420.0 38.0 L 413.0 41.7 L 427.0 49.0 L 413.0 56.3 L 427.0 63.7 L 413.0 71.0 L 427.0 78.3 L 420.0 82.0 L 420.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="440.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">12 Ω</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 120.0 L 420.0 120.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 240 120 L 240 132 M 228 132 L 252 132 M 232 137 L 248 137 M 236 142 L 244 142" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="a" data-node="a"><circle cx="60" cy="0" r="4" fill="currentColor"/><text x="60.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">a</text></g>
+<g class="nd" data-nodes="v1" data-node="v1"><circle cx="180" cy="0" r="4" fill="currentColor"/><text x="180.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v1</text></g>
+<g class="nd" data-nodes="v2" data-node="v2"><circle cx="300" cy="0" r="4" fill="currentColor"/><text x="300.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v2</text></g>
+<g class="nd" data-nodes="v3" data-node="v3"><circle cx="420" cy="0" r="4" fill="currentColor"/><text x="420.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">v3</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="180" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="300" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="420" cy="120" r="4" fill="currentColor"/></g></svg></figure>
+<p class="ask">Find <span class="eq"><i>v</i><sub>1</sub></span>, <span class="eq"><i>v</i><sub>2</sub></span>, <span class="eq"><i>v</i><sub>3</sub></span>.</p>
+<details class="rv"><summary>Equations</summary><div class="in"><div class="eqblock">
+<div><span class="lab">node 1</span> (<i>v</i><sub>1</sub> − 24)/6 + <i>v</i><sub>1</sub>/6 + (<i>v</i><sub>1</sub> − <i>v</i><sub>2</sub>)/3 = 0 &nbsp;<span class="num">×6 → 4<i>v</i><sub>1</sub> − 2<i>v</i><sub>2</sub> = 24</span></div>
+<div><span class="lab">node 2</span> (<i>v</i><sub>2</sub> − <i>v</i><sub>1</sub>)/3 − 2 + (<i>v</i><sub>2</sub> − <i>v</i><sub>3</sub>)/4 = 0 &nbsp;<span class="num">×12 → −4<i>v</i><sub>1</sub> + 7<i>v</i><sub>2</sub> − 3<i>v</i><sub>3</sub> = 24</span></div>
+<div><span class="lab">node 3</span> (<i>v</i><sub>3</sub> − <i>v</i><sub>2</sub>)/4 + <i>v</i><sub>3</sub>/12 = 0 &nbsp;<span class="num">×12 → −3<i>v</i><sub>2</sub> + 4<i>v</i><sub>3</sub> = 0</span></div></div></div></details>
+<details class="rv"><summary>Answer</summary><div class="in"><span class="ans">v1 = 14.73 V · v2 = 17.45 V · v3 = 13.09 V</span></div></details>
+</div></article>
+
+<article class="prob"><header><span class="no">7</span><h3>Find the gain <i>k</i> — Exercise sheet #2, problem 2</h3><span class="lvl">Block 4 · quiz level</span></header><div class="body">
+<figure><svg id="figX2" class="circ" viewBox="-80 -55 525 220" width="525" height="220" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="el src" data-nodes="a 0" ><path d="M 0.0 120.0 L 0.0 75.0 M 0.0 45.0 L 0.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="0.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><text x="0.0" y="53.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="0.0" y="66.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">−</text><text x="26.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">6 V</text></g>
+<g class="el" data-nodes="a vx" ><path d="M 0.0 0.0 L 38.0 0.0 L 41.7 7.0 L 49.0 -7.0 L 56.3 7.0 L 63.7 -7.0 L 71.0 7.0 L 78.3 -7.0 L 82.0 0.0 L 120.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="60.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">1 Ω</text></g>
+<g class="el" data-nodes="vx 0" ><path d="M 120.0 0.0 L 120.0 38.0 L 113.0 41.7 L 127.0 49.0 L 113.0 56.3 L 127.0 63.7 L 113.0 71.0 L 127.0 78.3 L 120.0 82.0 L 120.0 120.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="140.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">4 Ω</text></g>
+<g class="el" data-nodes="vx vy" ><path d="M 120.0 0.0 L 158.0 0.0 L 161.7 7.0 L 169.0 -7.0 L 176.3 7.0 L 183.7 -7.0 L 191.0 7.0 L 198.3 -7.0 L 202.0 0.0 L 240.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="180.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">2 Ω</text></g>
+<g class="el src" data-nodes="vy 0" ><path d="M 240.0 120.0 L 240.0 75.0 M 240.0 45.0 L 240.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="240.0" cy="60.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="240.0" y1="69.0" x2="240.0" y2="51.0" stroke="currentColor" stroke-width="2"/><polygon points="240.0,48.0 243.8,55.0 236.2,55.0" fill="currentColor" stroke="none"/><text x="266.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">2 A</text></g>
+<g class="el" data-nodes="vy d" ><path d="M 240.0 0.0 L 278.0 0.0 L 281.7 7.0 L 289.0 -7.0 L 296.3 7.0 L 303.7 -7.0 L 311.0 7.0 L 318.3 -7.0 L 322.0 0.0 L 360.0 0.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="300.0" y="-20.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">3 Ω</text></g>
+<g class="el src" data-nodes="d 0" ><path d="M 360.0 120.0 L 360.0 75.0 M 360.0 45.0 L 360.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><polygon points="360.0,45.0 375.0,60.0 360.0,75.0 345.0,60.0" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><text x="360.0" y="53.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="360.0" y="66.5" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">−</text><text x="386.0" y="60.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="var(--accent, #c2410c)" class="lbl">k·vx</text></g>
+<g class="wire" data-nodes="0" ><path d="M 0.0 120.0 L 360.0 120.0" fill="none" stroke="currentColor" stroke-width="2"/></g>
+<g class="gnd" data-nodes="0" ><path d="M 180 120 L 180 132 M 168 132 L 192 132 M 172 137 L 188 137 M 176 142 L 184 142" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="a" data-node="a"><circle cx="0" cy="0" r="4" fill="currentColor"/><text x="0.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">a</text></g>
+<g class="nd" data-nodes="vx" data-node="vx"><circle cx="120" cy="0" r="4" fill="currentColor"/><text x="120.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">vx</text></g>
+<g class="nd" data-nodes="vy" data-node="vy"><circle cx="240" cy="0" r="4" fill="currentColor"/><text x="240.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">vy</text></g>
+<g class="nd" data-nodes="d" data-node="d"><circle cx="360" cy="0" r="4" fill="currentColor"/><text x="360.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">d</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="120" cy="120" r="4" fill="currentColor"/></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="240" cy="120" r="4" fill="currentColor"/></g></svg></figure>
+<p class="ask">Use nodal analysis to find the value of <span class="eq"><i>k</i></span> that makes <span class="eq"><i>v</i><sub>y</sub></span> = 0. (Sheet answer: <span class="eq"><i>k</i></span> = −3.25.)</p>
+<details class="rv"><summary>Equations</summary><div class="in">
+<p>Both voltage sources are grounded: <span class="eq"><i>v</i><sub>a</sub></span> = 6 V and <span class="eq"><i>v</i><sub>d</sub> = <i>k</i>·<i>v</i><sub>x</sub></span> (Rule 4: the label is used like a number). Unknown nodes: <span class="eq"><i>v</i><sub>x</sub>, <i>v</i><sub>y</sub></span>.</p>
+<div class="eqblock">
+<div><span class="lab">node x</span> (<i>v</i><sub>x</sub> − 6)/1 + <i>v</i><sub>x</sub>/4 + (<i>v</i><sub>x</sub> − <i>v</i><sub>y</sub>)/2 = 0</div>
+<div><span class="lab">node y</span> (<i>v</i><sub>y</sub> − <i>v</i><sub>x</sub>)/2 − 2 + (<i>v</i><sub>y</sub> − <i>k</i><i>v</i><sub>x</sub>)/3 = 0</div>
+<div>set <i>v</i><sub>y</sub> = 0 in both and solve for <i>v</i><sub>x</sub>, then <i>k</i></div></div></div></details>
+<details class="rv"><summary>Answer</summary><div class="in"><div class="eqblock"><div>node x with <i>v</i><sub>y</sub> = 0: <i>v</i><sub>x</sub>(1 + 1/4 + 1/2) = 6 → <i>v</i><sub>x</sub> = 3.429 V</div><div>node y: −3.429/2 − 2 − <i>k</i>·3.429/3 = 0 → <i>k</i> = (−1.714 − 2) × 3/3.429</div></div><span class="ans">k = −3.25</span></div></details>
+</div></article>
+
+<article class="prob"><header><span class="no">8</span><h3>Challenge — Exercise sheet #2, problem 1</h3><span class="lvl">two supernodes</span></header><div class="body">
+<figure><svg id="figX1" class="circ" viewBox="-80 -55 525 460" width="525" height="460" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif"><g class="el src" data-nodes="L T" ><path d="M 0.0 180.0 L 79.4 100.6 M 100.6 79.4 L 180.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="90.0" cy="90.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><text x="94.6" y="85.4" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="85.4" y="94.6" text-anchor="middle" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl" font-weight="bold">−</text><text x="56.0" y="90.0" text-anchor="end" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">100 V</text></g>
+<g class="el" data-nodes="T R" ><path d="M 180.0 0.0 L 254.4 74.4 L 252.1 82.0 L 267.2 77.3 L 262.5 92.4 L 277.5 87.6 L 272.8 102.7 L 287.9 98.0 L 285.6 105.6 L 360.0 180.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="304.0" y="90.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">12.5 Ω</text></g>
+<g class="el" data-nodes="L C" ><path d="M 0.0 180.0 L 68.0 180.0 L 71.7 187.0 L 79.0 173.0 L 86.3 187.0 L 93.7 173.0 L 101.0 187.0 L 108.3 173.0 L 112.0 180.0 L 180.0 180.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="90.0" y="160.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">20 Ω</text></g>
+<g class="el" data-nodes="C R" ><path d="M 180.0 180.0 L 260.0 180.0 M 280.0 180.0 L 360.0 180.0" stroke="currentColor" stroke-width="2" fill="none"/><line x1="261.0" y1="186.0" x2="261.0" y2="174.0" stroke="currentColor" stroke-width="2"/><line x1="267.0" y1="192.0" x2="267.0" y2="168.0" stroke="currentColor" stroke-width="2"/><line x1="273.0" y1="186.0" x2="273.0" y2="174.0" stroke="currentColor" stroke-width="2"/><line x1="279.0" y1="192.0" x2="279.0" y2="168.0" stroke="currentColor" stroke-width="2"/><text x="290.0" y="194.0" text-anchor="middle" dominant-baseline="central" font-size="14" fill="currentColor" class="lbl" font-weight="bold">+</text><text x="270.0" y="154.0" text-anchor="middle" dominant-baseline="auto" font-size="15" fill="currentColor" class="lbl">150 V</text></g>
+<g class="el" data-nodes="C 0" ><path d="M 180.0 180.0 L 180.0 248.0 L 173.0 251.7 L 187.0 259.0 L 173.0 266.3 L 187.0 273.7 L 173.0 281.0 L 187.0 288.3 L 180.0 292.0 L 180.0 360.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="158.0" y="270.0" text-anchor="end" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">25 Ω</text></g>
+<g class="ann" data-nodes="" ><text x="202.0" y="210.0" text-anchor="middle" dominant-baseline="central" font-size="14" fill="var(--accent, #c2410c)" class="lbl" font-weight="bold">+</text><text x="202.0" y="330.0" text-anchor="middle" dominant-baseline="central" font-size="14" fill="var(--accent, #c2410c)" class="lbl" font-weight="bold">−</text><text x="202.0" y="270.0" text-anchor="middle" dominant-baseline="central" font-size="14" fill="var(--accent, #c2410c)" class="ann">v4</text></g>
+<g class="el" data-nodes="L 0" ><path d="M 0.0 180.0 L 74.4 254.4 L 72.1 262.0 L 87.2 257.3 L 82.5 272.4 L 97.5 267.6 L 92.8 282.7 L 107.9 278.0 L 105.6 285.6 L 180.0 360.0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="56.0" y="270.0" text-anchor="end" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">10 Ω</text></g>
+<g class="el src" data-nodes="0 R" ><path d="M 180.0 360.0 L 259.4 280.6 M 280.6 259.4 L 360.0 180.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="270.0" cy="270.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="263.6" y1="276.4" x2="276.4" y2="263.6" stroke="currentColor" stroke-width="2"/><polygon points="278.5,261.5 276.3,269.2 270.8,263.7" fill="currentColor" stroke="none"/><text x="304.0" y="270.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">10 A</text></g>
+<g class="el src" data-nodes="C T" ><path d="M 180.0 180.0 L 180.0 105.0 M 180.0 75.0 L 180.0 0.0" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="180.0" cy="90.0" r="15" fill="var(--paper, #fff)" stroke="currentColor" stroke-width="2"/><line x1="180.0" y1="99.0" x2="180.0" y2="81.0" stroke="currentColor" stroke-width="2"/><polygon points="180.0,78.0 183.8,85.0 176.2,85.0" fill="currentColor" stroke="none"/><text x="204.0" y="90.0" text-anchor="start" dominant-baseline="central" font-size="15" fill="currentColor" class="lbl">5 A</text></g>
+<g class="gnd" data-nodes="0" ><path d="M 180 360 L 180 372 M 168 372 L 192 372 M 172 377 L 188 377 M 176 382 L 184 382" stroke="currentColor" stroke-width="2" fill="none"/></g>
+<g class="nd" data-nodes="T" data-node="T"><circle cx="180" cy="0" r="4" fill="currentColor"/><text x="180.0" y="-12.0" text-anchor="middle" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">T</text></g>
+<g class="nd" data-nodes="L" data-node="L"><circle cx="0" cy="180" r="4" fill="currentColor"/><text x="-12.0" y="180.0" text-anchor="end" dominant-baseline="central" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">L</text></g>
+<g class="nd" data-nodes="R" data-node="R"><circle cx="360" cy="180" r="4" fill="currentColor"/><text x="372.0" y="180.0" text-anchor="start" dominant-baseline="central" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">R</text></g>
+<g class="nd" data-nodes="C" data-node="C"><circle cx="180" cy="180" r="4" fill="currentColor"/><text x="172.0" y="170.0" text-anchor="end" dominant-baseline="auto" font-size="16" fill="currentColor" class="nodelbl" font-weight="bold">C</text></g>
+<g class="nd" data-nodes="0" data-node="0"><circle cx="180" cy="360" r="4" fill="currentColor"/></g></svg></figure>
+<p class="ask">Use nodal analysis to find <span class="eq"><i>v</i><sub>4</sub></span>. (Sheet answer: 63.06 V.) Take the bottom node as ground. Sources: the 100 V source has its + toward T; the 150 V battery has its + (long plate) toward R; the 5 A source pushes from C up to T; the 10 A source pushes from the bottom node toward R.</p>
+<details class="rv"><summary>Hint</summary><div class="in"><p>Two floating voltage sources → two supernodes: {T, L} and {C, R}. That gives two bubble KCLs plus two constraints for four unknowns. <span class="eq"><i>v</i><sub>4</sub></span> is just <span class="eq"><i>v</i><sub>C</sub></span> (the 25 Ω goes to ground). Diagonal resistors are still just resistors: "me minus them over R".</p></div></details>
+<details class="rv"><summary>Equations</summary><div class="in"><div class="eqblock">
+<div><span class="lab">constraints</span> <i>v</i><sub>T</sub> − <i>v</i><sub>L</sub> = 100; &nbsp; <i>v</i><sub>R</sub> − <i>v</i><sub>C</sub> = 150</div>
+<div><span class="lab">supernode {T,L}</span> (<i>v</i><sub>T</sub> − <i>v</i><sub>R</sub>)/12.5 − 5 + (<i>v</i><sub>L</sub> − <i>v</i><sub>C</sub>)/20 + <i>v</i><sub>L</sub>/10 = 0</div>
+<div><span class="lab">supernode {C,R}</span> <i>v</i><sub>C</sub>/25 + (<i>v</i><sub>C</sub> − <i>v</i><sub>L</sub>)/20 + 5 + (<i>v</i><sub>R</sub> − <i>v</i><sub>T</sub>)/12.5 − 10 = 0</div></div>
+<p>The 5 A source leaves C (+5) and enters T (−5); it shows up in <em>both</em> bubbles with opposite signs because the bubbles are different. The 10 A enters R → −10.</p></div></details>
+<details class="rv"><summary>Answer</summary><div class="in"><span class="ans">vT = 174.8 V · vL = 74.77 V · vR = 213.1 V · vC = v4 = 63.06 V</span></div></details>
+</div></article>
+
+<footer class="end">Sources: DC Part II lecture slides (Nodal Analysis, slides 40–68, examples 2–10); Exercise sheet #2 (problems 1–2); old quiz questions 2 and 4. Answers cross-checked numerically. Day 2 will cover mesh analysis and reuse the same circuits so you can compare methods.</footer>
+</section>
+</main>
+</div>
+<script>
+(function(){
+  var store = {
+    get: function(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+    set: function(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+  };
+  var V = function(s){ return s.replace(/⟨([a-zA-Z])(\w*)⟩/g, function(_,a,b){ return '<i>'+a+'</i>'+(b?'<sub>'+b+'</sub>':''); }); };
+
+  /* tutor notes toggle */
+  var tt = document.getElementById('tutorToggle');
+  var saved = store.get('nodal.tutor');
+  tt.checked = saved === null ? true : saved === '1';
+  document.body.classList.toggle('tutor-on', tt.checked);
+  tt.addEventListener('change', function(){ document.body.classList.toggle('tutor-on', tt.checked); store.set('nodal.tutor', tt.checked ? '1' : '0'); });
+
+  /* mastery checklist */
+  var boxes = document.querySelectorAll('#mastery input');
+  var mc = document.getElementById('mcount'), mt = document.getElementById('mtotal');
+  mt.textContent = boxes.length;
+  function refresh(){ var n=0; boxes.forEach(function(b){ b.parentElement.classList.toggle('done', b.checked); if(b.checked) n++; }); mc.textContent = n; }
+  boxes.forEach(function(b){ b.checked = store.get('nodal.'+b.dataset.k) === '1'; b.addEventListener('change', function(){ store.set('nodal.'+b.dataset.k, b.checked?'1':'0'); refresh(); }); });
+  refresh();
+
+  /* timeline highlight */
+  var items = Array.prototype.slice.call(document.querySelectorAll('#timeline li a[href^="#"]'));
+  var secs = items.map(function(a){ return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ items.forEach(function(a){ a.parentElement.classList.toggle('active', a.getAttribute('href') === '#'+e.target.id); }); } });
+    }, {rootMargin:'-40% 0px -55% 0px'});
+    secs.forEach(function(s){ io.observe(s); });
+  }
+
+  /* worked-example steppers */
+  document.querySelectorAll('[data-worked]').forEach(function(w){
+    var steps = w.querySelectorAll('.steps > li'), i = 0, cnt = w.querySelector('.cnt'), nextB = w.querySelector('[data-next]');
+    function show(){ steps.forEach(function(s,k){ s.classList.toggle('shown', k < i); }); cnt.textContent = i + ' / ' + steps.length + ' steps'; nextB.disabled = i >= steps.length; nextB.textContent = i >= steps.length ? 'All steps shown' : (i===0 ? 'Reveal step 1' : 'Reveal next step'); }
+    i = 1; show();
+    nextB.addEventListener('click', function(){ if(i < steps.length){ i++; show(); steps[i-1].scrollIntoView({block:'nearest', behavior:'smooth'}); } });
+    w.querySelector('[data-all]').addEventListener('click', function(){ i = steps.length; show(); });
+  });
+
+  /* quizzes */
+  document.querySelectorAll('.quiz').forEach(function(q){
+    var ans = +q.dataset.answer, fb = q.querySelector('.fb'), opts = q.querySelectorAll('.opts button');
+    opts.forEach(function(b,k){ b.addEventListener('click', function(){
+      opts.forEach(function(o){ o.classList.remove('right','wrong'); });
+      if(k === ans){ b.classList.add('right'); fb.textContent = fb.dataset.ok; fb.className = 'fb ok'; }
+      else { b.classList.add('wrong'); opts[ans].classList.add('right'); fb.textContent = fb.dataset.no; fb.className = 'fb no'; }
+    }); });
+  });
+
+  /* node colouring */
+  var cb = document.getElementById('colorNodes');
+  if (cb) cb.addEventListener('click', function(){
+    var svg = document.getElementById('figNodes'), on = svg.classList.toggle('colored');
+    document.getElementById('nodesAnswer').hidden = !on; cb.textContent = on ? 'Hide colours' : 'Colour the nodes';
+  });
+
+  /* KCL explorer */
+  var KCL = {
+    S5: {
+      v1: [['10 Ω down to ground','⟨v1⟩/10','me minus 0, over 10'],['5 Ω across to v2','(⟨v1⟩ − ⟨v2⟩)/5','me minus them'],['20 Ω on top to v3','(⟨v1⟩ − ⟨v3⟩)/20','the top resistor also belongs to v1']],
+      v2: [['5 Ω back to v1','(⟨v2⟩ − ⟨v1⟩)/5','order flips: now v2 is "me"'],['10 Ω across to v3','(⟨v2⟩ − ⟨v3⟩)/10','me minus them'],['10 A source, arrow INTO v2','− 10','entering → negative on the leaving side']],
+      v3: [['5 Ω down to ground','⟨v3⟩/5','me minus 0'],['10 Ω back to v2','(⟨v3⟩ − ⟨v2⟩)/10','me minus them'],['20 Ω on top back to v1','(⟨v3⟩ − ⟨v1⟩)/20','same resistor as in v1\'s equation, flipped']]
+    }
+  };
+  document.querySelectorAll('.explorer[data-circ]').forEach(function(ex){
+    var data = KCL[ex.dataset.circ]; if(!data) return;
+    var svg = ex.querySelector('svg'), out = ex.querySelector('.out'), btns = ex.querySelectorAll('.nodebtns button');
+    function pick(node){
+      btns.forEach(function(b){ b.classList.toggle('on', b.dataset.node === node); });
+      svg.classList.add('dim');
+      svg.querySelectorAll('[data-nodes]').forEach(function(g){ var ns = (g.getAttribute('data-nodes')||'').split(' '); g.classList.toggle('hi', ns.indexOf(node) >= 0); });
+      svg.querySelectorAll('.nd').forEach(function(g){ g.classList.toggle('on', g.getAttribute('data-node') === node); });
+      var terms = data[node], html = '<h4>KCL at '+V('⟨'+node+'⟩')+' — currents leaving</h4>';
+      terms.forEach(function(t){ html += '<div class="term"><span class="t">'+V(t[1])+'</span><span class="w"><b>'+t[0]+'</b><br>'+t[2]+'</span></div>'; });
+      html += '<div class="sum"><small>equation</small>'+terms.map(function(t){return V(t[1]);}).join(' + ').replace(/\+ −/g,'−')+' = 0</div>';
+      out.innerHTML = html;
+    }
+    btns.forEach(function(b){ b.addEventListener('click', function(){ pick(b.dataset.node); }); });
+    svg.querySelectorAll('.nd[data-node]').forEach(function(g){ var n = g.getAttribute('data-node'); if(data[n]) { g.addEventListener('click', function(){ pick(n); }); g.setAttribute('tabindex','0'); g.setAttribute('role','button'); g.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(n);} }); } });
+  });
+})();
+</script>
